@@ -1,0 +1,202 @@
+.site {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4) var(--space-12);
+}
+
+.site-nav,
+.site-nav-rest,
+.site-links,
+.colorways,
+.promise-grid,
+.stat-grid,
+.price-grid,
+.preview,
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.site-nav {
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+}
+
+.site-nav-rest {
+  justify-content: flex-end;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.site-links {
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.site-links a {
+  color: var(--ink);
+}
+
+.hero {
+  position: relative;
+  margin-bottom: var(--space-8);
+  padding: var(--space-8);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-3);
+  background-color: var(--accent-soft);
+  background-image: url("../design-system/assets/Patterns/warp-check-tile.svg");
+  background-size: 220px;
+  box-shadow: var(--elev-3);
+}
+
+.hero-copy {
+  max-width: 640px;
+}
+
+.hero-copy h1 {
+  margin: 0 0 var(--space-4);
+  text-transform: uppercase;
+}
+
+.lede {
+  max-width: 36rem;
+  margin: 0 0 var(--space-6);
+  font-size: 18px;
+  line-height: 28px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.price-note {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.section {
+  margin: var(--space-12) 0;
+}
+
+.section h2 {
+  margin: 0 0 var(--space-6);
+}
+
+.promise-grid,
+.price-grid {
+  align-items: stretch;
+}
+
+.promise-grid .gl-win,
+.price-grid .gl-win {
+  flex: 1 1 240px;
+}
+
+.preview {
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.stat-grid {
+  align-items: stretch;
+  flex: 1 1 280px;
+}
+
+.stat-grid .gl-stat {
+  flex: 1 1 140px;
+}
+
+.fine {
+  margin: var(--space-4) 0 0;
+  max-width: 40rem;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.prose {
+  max-width: 40rem;
+}
+
+.prose h1 {
+  margin: 0 0 var(--space-6);
+  text-transform: uppercase;
+}
+
+.prose h2 {
+  margin: var(--space-8) 0 var(--space-4);
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.prose p,
+.prose li {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.prose ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.prose li + li {
+  margin-top: var(--space-2);
+}
+
+.site-footer {
+  justify-content: space-between;
+  margin-top: var(--space-12);
+  padding-top: var(--space-6);
+  border-top: var(--stroke-2) solid var(--line);
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+.site-footer p {
+  margin: 0;
+}
+
+.site-footer nav {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.site-footer a {
+  color: var(--ink);
+}
+
+button.gl-btn {
+  font: inherit;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+a.gl-btn {
+  text-decoration: none;
+}

@@ -4,9 +4,9 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <p>
-        made with [♥] by{" "}
+        built by{" "}
         <a href="https://pupcakes.me" rel="noopener noreferrer">
-          pupcakes
+          Pupcakes
         </a>
       </p>
       <nav aria-label="Footer">

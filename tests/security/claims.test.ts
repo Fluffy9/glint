@@ -17,7 +17,8 @@ describe("Public claims", () => {
       ).toBe(false);
     }
     expect(page).toContain("Stripe");
-    expect(page).toContain("Locked backup");
-    expect(page.toLowerCase()).toContain("in your account");
+    expect(page.toLowerCase()).toContain("ciphertext");
+    expect(page.toLowerCase()).toContain("password");
+    expect(page.toLowerCase()).not.toContain("in your account");
   });
 });

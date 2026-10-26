@@ -36,8 +36,8 @@ export function PriceSection({ prices }: { prices: DisplayPrices }) {
               <span className="gl-stat-unit">usd / year</span>
             </p>
             <p>
-              Optional. You choose what leaves the phone. Cancel backup and the
-              band still works. <Link href="/privacy">How that choice works.</Link>
+              Optional. Backup leaves the phone scrambled. Cancel it and the
+              band still works. <Link href="/privacy">How encryption works.</Link>
             </p>
           </div>
         </article>

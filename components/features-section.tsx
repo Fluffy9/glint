@@ -41,7 +41,7 @@ const features: {
   {
     id: "export",
     title: "Export anytime",
-    body: "Take a CSV or JSON copy whenever you want. No portal scavenger hunt.",
+    body: "Take a CSV or JSON copy whenever you want, including a plain file to Google Drive.",
   },
   {
     id: "trash",

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { CompareSection } from "@/components/compare-section";
+import { FaqSection } from "@/components/faq-section";
 import { FeaturesSection } from "@/components/features-section";
 import { HomeHero } from "@/components/home-hero";
 import { SiteFooter } from "@/components/site-footer";
@@ -28,6 +29,7 @@ function HomeBody({ prices }: { prices: DisplayPrices }) {
       <div className="site">
         <FeaturesSection />
         <CompareSection />
+        <FaqSection />
         <SiteFooter />
       </div>
     </>

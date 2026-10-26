@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
   title: "Privacy · Glint",
-  description: "What Glint stores today, and the choice you get when backup exists.",
+  description: "What Glint stores today, and how encrypted backup works.",
 };
 
 export default function PrivacyPage() {
@@ -18,46 +18,35 @@ export default function PrivacyPage() {
           This website takes payment through Stripe. We store the email on the
           order, whether you bought the band, whether backup is on, and the
           status of that subscription. We do not collect heart rate, sleep, or
-          activity here.
+          activity here as plaintext.
+        </p>
+        <h2>On the phone</h2>
+        <p>
+          Tracking starts on your phone. A new phone does not have that copy
+          until you restore it.
         </p>
         <h2>When backup is on</h2>
         <p>
-          Activity, heart, and sleep each get their own destination. You pick.
+          Backup is always encrypted before it leaves the phone. We store
+          ciphertext only. We cannot read it. Another company cannot pull a
+          readable copy from us.
         </p>
-        <ul>
-          <li>
-            On this phone. That category is not uploaded. A new phone does not
-            have it.
-          </li>
-          <li>
-            Locked backup. The phone scrambles it before upload. We store the
-            scrambled copy and cannot read it, so it will not show when you log
-            in on the web, and another company cannot pull it from us. Restoring
-            it takes a recovery key. Resetting your password does not unlock it.
-            If you lose the key, the backup is gone.
-          </li>
-          <li>
-            In your account. We can read that category. That is what lets charts
-            load after you sign in. The database host encrypts the disks, and
-            only your login can fetch the rows, but anyone who administers the
-            database can read this copy. The screen says that before you turn it
-            on.
-          </li>
-        </ul>
         <p>
-          The starting point is on this phone. If you pay for backup, the
-          starting point is locked backup. Charts and remote apps stay off until
-          you turn them on.
+          The website unlocks that copy with your password so you can see charts
+          while you are signed in. The password is how decryption works. A
+          password reset does not unlock old backup. If you lose the password
+          and you do not have the phone copy or an export, that backup is gone.
+        </p>
+        <h2>Exports</h2>
+        <p>
+          You can export a plain CSV or JSON anytime, including to Google Drive
+          or another place you pick. That export is not scrambled. Treat it like
+          any other file you own.
         </p>
         <h2>Other apps</h2>
         <p>
-          An app on your phone can receive a category from the phone, including
-          when the cloud copy is locked. The phone already has the samples.
-        </p>
-        <p>
-          An app that pulls from your Glint account can receive a category only
-          when that category is in your account. A locked backup has nothing for
-          them to fetch. You can revoke a grant.
+          An app on your phone can receive a category from the phone. The phone
+          already has the samples.
         </p>
         <p>
           Turning a category off deletes the copy we were allowed to hold.

@@ -1,32 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { copy } from "@/content";
-import {
-  ACCOUNT_SESSION_EVENT,
-  clearAccountSession,
-  readAccountSession,
-} from "@/lib/account-session";
+import { clearAccountSession } from "@/lib/account-session";
+import { useAccountChrome } from "@/lib/use-account-chrome";
 import { ModeToggle } from "./mode-toggle";
 
 export function SiteLinks() {
-  const [ready, setReady] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
-
-  useEffect(() => {
-    const sync = () => {
-      setSignedIn(readAccountSession() !== null);
-      setReady(true);
-    };
-    sync();
-    window.addEventListener(ACCOUNT_SESSION_EVENT, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(ACCOUNT_SESSION_EVENT, sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
+  const router = useRouter();
+  const chrome = useAccountChrome();
 
   return (
     <>
@@ -36,9 +19,9 @@ export function SiteLinks() {
         <Link href="/security">{copy.nav.security}</Link>
       </nav>
       <div className="site-actions">
-        {!ready ? (
+        {chrome === "checking" ? (
           <span className="site-signin-skeleton" role="status" aria-label={copy.account.checking} />
-        ) : signedIn ? (
+        ) : chrome === "in" ? (
           <>
             <Link className="site-signin" href="/account">
               <UserIcon />
@@ -49,14 +32,14 @@ export function SiteLinks() {
               className="site-signin"
               onClick={() => {
                 clearAccountSession();
-                setSignedIn(false);
+                router.replace("/login");
               }}
             >
               {copy.nav.signOut}
             </button>
           </>
         ) : (
-          <Link className="site-signin" href="/account">
+          <Link className="site-signin" href="/login">
             <UserIcon />
             {copy.nav.signIn}
           </Link>

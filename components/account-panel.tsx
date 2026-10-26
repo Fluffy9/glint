@@ -1,68 +1,56 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { copy, fill } from "@/content";
+import { usePathname, useRouter } from "next/navigation";
+import { copy } from "@/content";
 import {
+  AccountSkeleton,
+  AccountStatus,
+  BackupBlob,
+  DeleteAccountForm,
+  SignInForm,
+  TestBackupForm,
+} from "@/components/account/views";
+import { latestEmulatorSignInLink, sendEmailLink, callAuthedFunction } from "@/functions/src/domain/auth-rest";
+import { emulatorAuthOrigin, functionUrl } from "@/functions/src/domain/emulator";
+import { canDeleteAccount, canSendSignIn } from "@/functions/src/domain/state";
+import {
+  ACCOUNT_SESSION_EVENT,
   clearAccountSession,
+  noteEmailSignInSettled,
   readAccountSession,
   readStoredEmail,
   writeStoredEmail,
   type AccountSession,
 } from "@/lib/account-session";
+import { browserFetch, firebaseClient } from "@/lib/client-firebase";
 import { completeEmailSignIn } from "@/lib/complete-email-sign-in";
-import {
-  callAuthedFunction,
-  getEncryptedBackup,
-  putEncryptedBackup,
-  latestEmulatorSignInLink,
-  sendEmailLink,
-} from "../functions/src/domain/auth-rest";
-import {
-  bytesMatch,
-  bytesToBase64,
-  decryptWithPassphrase,
-  encryptWithPassphrase,
-  TEST_BACKUP_PLAINTEXT,
-  type CipherBlob,
-} from "../functions/src/domain/crypto";
-import { emulatorAuthOrigin, firebaseTargets, functionUrl } from "../functions/src/domain/emulator";
-import { backupObjectPath, canDeleteAccount, canSendSignIn } from "../functions/src/domain/state";
+import { useAccountChrome, useAccountSession } from "@/lib/use-account-chrome";
+import { saveTestBackup, unlockTestBackup, type StoredTestBackup } from "@/lib/test-backup";
 
-const targets = firebaseTargets({
-  NODE_ENV: process.env.NODE_ENV,
-  NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  NEXT_PUBLIC_FIREBASE_PROJECT_ID: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-});
-
-type StoredTestBackup = {
-  objectPath: string;
-  nonce: string;
-  salt: string;
-  keyVersion: CipherBlob["keyVersion"];
-  ciphertextBase64: string;
-};
+const targets = firebaseClient;
 
 function stripSignInParams() {
   const url = new URL(window.location.href);
-  if (!url.searchParams.has("oobCode") && !url.searchParams.has("mode") && !url.searchParams.has("apiKey")) {
-    return;
-  }
+  if (!url.searchParams.has("oobCode") && !url.searchParams.has("mode") && !url.searchParams.has("apiKey")) return;
   url.search = "";
   window.history.replaceState({}, "", `${url.pathname}${url.hash}`);
 }
 
-function AccountSkeleton() {
-  return (
-    <div className="account-skeleton" role="status" aria-live="polite" aria-busy="true">
-      <span className="gl-sr">{copy.account.checking}</span>
-      <span className="account-skeleton-line" />
-      <span className="account-skeleton-line account-skeleton-line-lg" />
-      <span className="account-skeleton-line account-skeleton-line-lg" />
-    </div>
-  );
+function restingNote(): string | null {
+  if (!targets) return copy.account.notConfigured;
+  return targets.emulators ? copy.account.emulatorNote : null;
+}
+
+function hasOobCode(): boolean {
+  return Boolean(new URLSearchParams(window.location.search).get("oobCode"));
 }
 
 export function AccountPanel() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const chrome = useAccountChrome();
+  const liveSession = useAccountSession();
   const configured = targets !== null;
   const [email, setEmail] = useState("");
   const [phrase, setPhrase] = useState("");
@@ -70,6 +58,7 @@ export function AccountPanel() {
   const [unlockPhrase, setUnlockPhrase] = useState("");
   const [signInLink, setSignInLink] = useState<string | null>(null);
   const [session, setSession] = useState<AccountSession | null>(null);
+  const active = session ?? liveSession;
   const [ready, setReady] = useState(false);
   const [storedBackup, setStoredBackup] = useState<StoredTestBackup | null>(null);
   const [unlockedText, setUnlockedText] = useState<string | null>(null);
@@ -78,31 +67,44 @@ export function AccountPanel() {
   const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
+  function resetSignedOutUi() {
+    setSession(null);
+    setStoredBackup(null);
+    setUnlockedText(null);
+    setShowTestForm(true);
+    setPhrase("");
+    setPassphrase("");
+    setUnlockPhrase("");
+    setSignInLink(null);
+    setError(null);
+    setInfo(restingNote());
+  }
+
   useEffect(() => {
-    const existing = readAccountSession();
     const savedEmail = readStoredEmail();
     if (savedEmail) setEmail(savedEmail);
+
+    const existing = readAccountSession();
     if (existing) {
       setSession(existing);
       stripSignInParams();
-      setInfo(targets?.emulators ? copy.account.emulatorNote : null);
+      setInfo(restingNote());
       setReady(true);
       return;
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const oobCode = params.get("oobCode");
+    resetSignedOutUi();
+
+    const oobCode = new URLSearchParams(window.location.search).get("oobCode");
     if (!targets || !oobCode || !savedEmail) {
-      setInfo(
-        configured ? (targets?.emulators ? copy.account.emulatorNote : null) : copy.account.notConfigured,
-      );
+      if (oobCode && savedEmail) noteEmailSignInSettled(oobCode);
       setReady(true);
       return;
     }
 
     let cancelled = false;
     void completeEmailSignIn({
-      fetch: globalThis.fetch.bind(globalThis),
+      fetch: browserFetch(),
       apiKey: targets.apiKey,
       email: savedEmail,
       oobCode,
@@ -114,7 +116,7 @@ export function AccountPanel() {
         if (cancelled) return;
         setSession(next);
         setError(null);
-        setInfo(null);
+        setInfo(restingNote());
         setReady(true);
       })
       .catch(() => {
@@ -130,12 +132,45 @@ export function AccountPanel() {
         }
         setError(copy.account.failed);
         setReady(true);
+      })
+      .finally(() => {
+        noteEmailSignInSettled(oobCode);
       });
 
     return () => {
       cancelled = true;
     };
+  }, [pathname]);
+
+  useEffect(() => {
+    const sync = () => {
+      const existing = readAccountSession();
+      if (!existing) {
+        resetSignedOutUi();
+        setReady(true);
+        return;
+      }
+      setSession(existing);
+      setReady(true);
+    };
+    window.addEventListener(ACCOUNT_SESSION_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(ACCOUNT_SESSION_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
   }, []);
+
+  useEffect(() => {
+    if (chrome === "checking") return;
+    if (chrome === "in" && pathname === "/login") {
+      router.replace("/account");
+      return;
+    }
+    if (chrome === "out" && pathname === "/account" && !hasOobCode()) {
+      router.replace("/login");
+    }
+  }, [chrome, pathname, router]);
 
   async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -144,12 +179,11 @@ export function AccountPanel() {
     setError(null);
     setSignInLink(null);
     try {
-      const continueUrl = `${window.location.origin}/account`;
       const sent = await sendEmailLink(
-        globalThis.fetch.bind(globalThis),
+        browserFetch(),
         targets.apiKey,
         email.trim(),
-        continueUrl,
+        `${window.location.origin}/account`,
         targets.authBase,
         targets.projectId,
       );
@@ -158,7 +192,7 @@ export function AccountPanel() {
         sent.oobLink ??
         (targets.emulators
           ? await latestEmulatorSignInLink(
-              globalThis.fetch.bind(globalThis),
+              browserFetch(),
               targets.projectId,
               email.trim(),
               emulatorAuthOrigin(targets.authBase),
@@ -175,36 +209,11 @@ export function AccountPanel() {
 
   async function saveBackup(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!targets || !session || passphrase.length < 8 || pending) return;
+    if (!targets || !active || passphrase.length < 8 || pending) return;
     setPending(true);
     setError(null);
     try {
-      const objectId = crypto.randomUUID();
-      const objectPath = backupObjectPath(session.localId, "heart", objectId);
-      const blob = await encryptWithPassphrase(
-        new TextEncoder().encode(TEST_BACKUP_PLAINTEXT),
-        passphrase,
-      );
-      await putEncryptedBackup(globalThis.fetch.bind(globalThis), {
-        storageBase: targets.storageBase,
-        firestoreBase: targets.firestoreBase,
-        idToken: session.idToken,
-        uid: session.localId,
-        objectPath,
-        objectId,
-        category: "heart",
-        nonce: blob.nonce,
-        salt: blob.salt,
-        keyVersion: blob.keyVersion,
-        ciphertext: blob.ciphertext,
-      });
-      setStoredBackup({
-        objectPath,
-        nonce: blob.nonce,
-        salt: blob.salt,
-        keyVersion: blob.keyVersion,
-        ciphertextBase64: bytesToBase64(blob.ciphertext),
-      });
+      setStoredBackup(await saveTestBackup(targets, active, passphrase));
       setUnlockedText(null);
       setShowTestForm(false);
       setPassphrase("");
@@ -217,30 +226,13 @@ export function AccountPanel() {
     }
   }
 
-  async function unlockBackup(event: FormEvent<HTMLFormElement>) {
+  async function unlock(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!targets || !session || !storedBackup || unlockPhrase.length < 8 || pending) return;
+    if (!targets || !active || !storedBackup || unlockPhrase.length < 8 || pending) return;
     setPending(true);
     setError(null);
     try {
-      const ciphertext = await getEncryptedBackup(globalThis.fetch.bind(globalThis), {
-        storageBase: targets.storageBase,
-        idToken: session.idToken,
-        objectPath: storedBackup.objectPath,
-      });
-      const plain = await decryptWithPassphrase(
-        {
-          ciphertext,
-          nonce: storedBackup.nonce,
-          salt: storedBackup.salt,
-          keyVersion: storedBackup.keyVersion,
-        },
-        unlockPhrase,
-      );
-      if (!bytesMatch(plain, new TextEncoder().encode(TEST_BACKUP_PLAINTEXT))) {
-        throw new Error("plaintext mismatch");
-      }
-      setUnlockedText(new TextDecoder().decode(plain));
+      setUnlockedText(await unlockTestBackup(targets, active, storedBackup, unlockPhrase));
       setUnlockPhrase("");
     } catch {
       setError(copy.account.unlockFailed);
@@ -252,22 +244,15 @@ export function AccountPanel() {
 
   async function remove(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!targets || !session || !canDeleteAccount(configured, true, phrase) || pending) return;
+    if (!targets || !active || !canDeleteAccount(configured, true, phrase) || pending) return;
     setPending(true);
     setError(null);
     try {
-      await callAuthedFunction(
-        globalThis.fetch.bind(globalThis),
-        functionUrl(targets, "deleteAccount"),
-        session.idToken,
-      );
+      await callAuthedFunction(browserFetch(), functionUrl(targets, "deleteAccount"), active.idToken);
       clearAccountSession();
-      setSession(null);
-      setPhrase("");
-      setStoredBackup(null);
-      setUnlockedText(null);
-      setShowTestForm(true);
+      resetSignedOutUi();
       setInfo(copy.account.deleted);
+      router.replace("/login");
     } catch {
       setError(copy.account.deleteFailed);
     } finally {
@@ -286,79 +271,29 @@ export function AccountPanel() {
 
   return (
     <div className="account-panel">
-      {!ready ? (
+      {chrome === "checking" || (chrome === "in" && !active) ? (
         <AccountSkeleton />
-      ) : session ? (
+      ) : active && chrome === "in" ? (
         <>
-          <div className="account-status" role="status">
-            <p className="account-status-label">{copy.account.statusLabel}</p>
-            <p className="account-status-line">{fill(copy.account.signedIn, { email: session.email })}</p>
-            <p className={`account-status-backup${storedBackup ? " is-saved" : ""}${unlocked ? " is-unlocked" : ""}`}>
-              {backupStatus}
-            </p>
-          </div>
-
+          <AccountStatus email={active.email} saved={storedBackup !== null} unlocked={unlocked} label={backupStatus} />
           {targets?.emulators && storedBackup ? (
-            <div className={`account-blob${unlocked ? " is-unlocked" : ""}`}>
-              <p className="account-blob-label">
-                {unlocked ? copy.account.blobUnlockedLabel : copy.account.blobLockedLabel}
-              </p>
-              <pre className="account-blob-text">{unlocked ? unlockedText : storedBackup.ciphertextBase64}</pre>
-              {unlocked ? (
-                <div className="account-result" role="status" aria-live="polite">
-                  <p className="account-result-title">{copy.account.unlockedTitle}</p>
-                  <p className="account-result-body">{copy.account.unlockedBody}</p>
-                </div>
-              ) : (
-                <form className="buy-form" onSubmit={unlockBackup}>
-                  <label className="gl-field">
-                    <span className="gl-field-label">{copy.account.unlockPassphrase}</span>
-                    <span className="gl-input">
-                      <input
-                        type="password"
-                        name="unlock"
-                        autoComplete="current-password"
-                        value={unlockPhrase}
-                        onChange={(event) => setUnlockPhrase(event.target.value)}
-                      />
-                    </span>
-                  </label>
-                  <button
-                    className="gl-btn gl-btn-primary"
-                    type="submit"
-                    disabled={unlockPhrase.length < 8 || pending}
-                  >
-                    {copy.account.unlockBackup}
-                  </button>
-                </form>
-              )}
-            </div>
+            <BackupBlob
+              stored={storedBackup}
+              unlockedText={unlockedText}
+              unlockPhrase={unlockPhrase}
+              pending={pending}
+              onUnlockPhrase={setUnlockPhrase}
+              onUnlock={unlock}
+            />
           ) : null}
-
           {targets?.emulators && showTestForm ? (
-            <form className="buy-form" onSubmit={saveBackup}>
-              <h2 className="account-section-title">{copy.account.testTitle}</h2>
-              <p className="account-section-body">{copy.account.testBody}</p>
-              <p className="account-blob-label">{copy.account.sampleLabel}</p>
-              <p className="account-sample">{TEST_BACKUP_PLAINTEXT}</p>
-              <label className="gl-field">
-                <span className="gl-field-label">{copy.account.passphrase}</span>
-                <span className="gl-input">
-                  <input
-                    type="password"
-                    name="passphrase"
-                    autoComplete="new-password"
-                    value={passphrase}
-                    onChange={(event) => setPassphrase(event.target.value)}
-                  />
-                </span>
-              </label>
-              <button className="gl-btn gl-btn-primary" type="submit" disabled={passphrase.length < 8 || pending}>
-                {copy.account.saveBackup}
-              </button>
-            </form>
+            <TestBackupForm
+              passphrase={passphrase}
+              pending={pending}
+              onPassphrase={setPassphrase}
+              onSubmit={saveBackup}
+            />
           ) : null}
-
           {targets?.emulators && storedBackup && unlocked && !showTestForm ? (
             <button
               className="gl-btn"
@@ -371,52 +306,29 @@ export function AccountPanel() {
               {copy.account.saveAnother}
             </button>
           ) : null}
-
-          <form className="buy-form" onSubmit={remove}>
-            <h2 className="h2">{copy.account.deleteTitle}</h2>
-            <p className="account-section-body">{copy.account.deleteBody}</p>
-            <label className="gl-field">
-              <span className="gl-field-label">{copy.account.confirmLabel}</span>
-              <span className="gl-input">
-                <input
-                  name="confirm"
-                  autoComplete="off"
-                  value={phrase}
-                  onChange={(event) => setPhrase(event.target.value)}
-                />
-              </span>
-            </label>
-            <button
-              className="gl-btn"
-              type="submit"
-              disabled={!canDeleteAccount(configured, true, phrase) || pending}
-            >
-              {copy.account.deleteButton}
-            </button>
-          </form>
+          <DeleteAccountForm
+            phrase={phrase}
+            pending={pending}
+            signedIn
+            configured={configured}
+            onPhrase={setPhrase}
+            onSubmit={remove}
+          />
         </>
       ) : (
-        <form className="buy-form" onSubmit={send}>
-          <label className="gl-field">
-            <span className="gl-field-label">{copy.account.emailLabel}</span>
-            <span className="gl-input">
-              <input
-                type="email"
-                name="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-              />
-            </span>
-          </label>
-          <button className="gl-btn gl-btn-primary" type="submit" disabled={!canSendSignIn(configured, email) || pending}>
-            {copy.account.sendLink}
-          </button>
-          {signInLink ? <a href={signInLink}>{copy.account.openLink}</a> : null}
-        </form>
+        <SignInForm
+          email={email}
+          pending={pending}
+          configured={configured}
+          signInLink={signInLink}
+          onEmail={setEmail}
+          onSubmit={send}
+        />
       )}
-      {ready && error ? <p className="account-notice-error">{error}</p> : null}
-      {ready && info && !error ? <p className="fine">{info}</p> : null}
+      {chrome !== "checking" && error ? <p className="account-notice-error">{error}</p> : null}
+      {chrome !== "checking" && !error && (info ?? restingNote()) ? (
+        <p className="fine">{info ?? restingNote()}</p>
+      ) : null}
     </div>
   );
 }

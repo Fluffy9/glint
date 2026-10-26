@@ -13,6 +13,10 @@ export type DisplayPrices = {
 };
 
 export async function getDisplayPrices(): Promise<DisplayPrices> {
+  // GitHub Pages is a static export. There is no request and no Stripe call.
+  if (process.env.GITHUB_PAGES === "1") {
+    return { ...fallbackPrices, checkoutEnabled: false };
+  }
   await connection();
   const bandPrice = process.env.STRIPE_PRICE_BAND;
   const backupPrice = process.env.STRIPE_PRICE_BACKUP;

@@ -1,0 +1,213 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400..700&family=Pixelify+Sans:wght@400..700&display=swap");
+
+/* Glint components. Every value comes from tokens.css; nothing here declares a token. */
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased; }
+.gl-row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; padding: var(--space-4) var(--space-4) var(--space-6); }
+.gl-col { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-6); }
+.gl-lbl { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .06em; min-width: 88px; }
+.gl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Shading: the brand's checkerboard at pixel scale. Set --gl-shade to choose the ink (default `shade`). */
+.gl-shade-25, .gl-shade-50, .gl-shade-75, .gl-dither { background-size: var(--dither-tile) var(--dither-tile); }
+.gl-shade-25 { background-image: conic-gradient(var(--gl-shade, var(--shade)) 0 25%, transparent 0); }
+.gl-shade-50 { background-image: repeating-conic-gradient(var(--gl-shade, var(--shade)) 0 25%, transparent 0 50%); }
+.gl-shade-75 { background-image: conic-gradient(transparent 0 25%, var(--gl-shade, var(--shade)) 0); }
+.gl-dither { background-image: repeating-conic-gradient(var(--line-subtle) 0 25%, transparent 0 50%); }
+
+/* Panels: the frame and fill live on ::before, the dithered elev-3 shadow on ::after, so content sits above both */
+.gl-win, .gl-stat { position: relative; isolation: isolate; border: var(--stroke-2) solid transparent; background: transparent; box-shadow: none; }
+.gl-win::before, .gl-stat::before { content: ""; position: absolute; inset: calc(-1 * var(--stroke-2)); z-index: -1; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1); background: var(--surface); }
+.gl-win::after, .gl-stat::after { content: ""; position: absolute; top: 2px; left: 2px; right: -6px; bottom: -6px; z-index: -2; border-radius: var(--radius-1);
+  background-image: repeating-conic-gradient(var(--shade) 0 25%, transparent 0 50%); background-size: var(--dither-tile) var(--dither-tile); }
+
+:where(.gl-btn, .gl-input input, .gl-chip, .gl-tab, .gl-toggle input, .gl-check input, .gl-radio input, .gl-slider input, .gl-x):focus-visible { outline: var(--stroke-3) solid var(--focus-ring); outline-offset: 2px; }
+
+/* Icon */
+.gl-icon { display: inline-block; flex: none; vertical-align: middle; }
+
+/* Button */
+.gl-btn { font-family: var(--font-mono); font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-4); border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1);
+  background: var(--surface); color: var(--ink); box-shadow: var(--elev-2); cursor: pointer; transition: transform var(--dur-press, 80ms) var(--ease-out, ease-out), box-shadow var(--dur-press, 80ms) var(--ease-out, ease-out); white-space: nowrap; }
+.gl-btn-primary { background: var(--accent); color: var(--on-accent); }
+.gl-btn-ghost { background: transparent; box-shadow: none; border-color: transparent; }
+.gl-btn-danger { background: var(--danger-soft); color: var(--danger); }
+.gl-btn-sm { height: 32px; padding: 0 var(--space-2); }
+.gl-btn:hover:not(:disabled), .gl-btn.is-hover { transform: translate(-1px, -1px); box-shadow: var(--elev-3); }
+.gl-btn-ghost:hover:not(:disabled), .gl-btn-ghost.is-hover { box-shadow: none; background: var(--surface) repeating-conic-gradient(var(--shade-accent) 0 25%, transparent 0 50%) 0 0 / var(--dither-tile) var(--dither-tile); transform: none; }
+.gl-btn:active:not(:disabled), .gl-btn.is-active { transform: translate(4px, 4px); box-shadow: none; }
+.gl-btn:disabled { cursor: not-allowed; color: var(--ink-disabled); border-color: var(--ink-disabled); box-shadow: none; background-color: var(--surface-sunken); background-image: repeating-conic-gradient(var(--line-subtle) 0 25%, transparent 0 50%); background-size: 4px 4px; }
+.gl-btn-icon { width: 40px; padding: 0; justify-content: center; }
+.gl-btn-sm.gl-btn-icon { width: 32px; }
+
+/* Input */
+.gl-field { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+.gl-field-label { font-family: var(--font-mono); font-size: 12px; line-height: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+.gl-input { display: flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-2) 0 var(--space-4); border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1); background: var(--surface); box-shadow: var(--elev-2); }
+.gl-input input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 15px; padding: 0; border-radius: var(--radius-1); }
+.gl-input input::placeholder { color: var(--ink-muted); }
+.gl-input:focus-within { outline: var(--stroke-3) solid var(--focus-ring); outline-offset: 2px; }
+.gl-input input:focus-visible { outline: none; }
+.gl-input.is-invalid { background: var(--danger-soft); }
+.gl-field-help { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.gl-field-help.is-error { color: var(--danger); }
+
+/* Chip */
+.gl-chip { display: inline-flex; align-items: center; gap: var(--space-1); height: 30px; padding: 0 var(--space-2) 0 12px; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-pill);
+  background: var(--surface); color: var(--ink); font-family: var(--font-sans); font-size: 14px; font-weight: 500; box-shadow: var(--elev-1); cursor: pointer; }
+.gl-chip-soft { background: var(--accent-soft); }
+.gl-chip:hover:not(.is-selected):not(.has-x), .gl-chip.is-hover { background: var(--surface) repeating-conic-gradient(var(--shade-accent) 0 25%, transparent 0 50%) 0 0 / var(--dither-tile) var(--dither-tile); }
+.gl-chip.is-selected { background: var(--accent); color: var(--on-accent); }
+.gl-chip:not(.has-x) { padding-right: 12px; }
+.gl-x { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 0; padding: 0; border-radius: var(--radius-pill); background: transparent; color: inherit; cursor: pointer; }
+.gl-x:hover { background: var(--ink); color: var(--bg); }
+
+/* Tabs */
+.gl-tabs { display: inline-flex; align-self: flex-start; max-width: 100%; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1); box-shadow: var(--elev-2); background: var(--surface); overflow: hidden; }
+.gl-tab { font-family: var(--font-mono); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; height: 36px; padding: 0 var(--space-4); border: 0; border-right: var(--stroke-2) solid var(--line); border-radius: var(--radius-0); background: transparent; color: var(--ink-muted); cursor: pointer; }
+.gl-tab:last-child { border-right: 0; }
+.gl-tab:hover { color: var(--ink); background: var(--surface) repeating-conic-gradient(var(--shade-accent) 0 25%, transparent 0 50%) 0 0 / var(--dither-tile) var(--dither-tile); }
+.gl-tab[aria-selected="true"] { background: var(--accent); color: var(--on-accent); font-weight: 500; }
+.gl-tab:focus-visible { outline-offset: -5px; }
+
+/* Window: the shared chrome of Card and Alert */
+.gl-win { border-radius: var(--radius-1); min-width: 0; }
+.gl-win-bar { display: flex; align-items: center; gap: var(--space-2); height: 34px; padding: 0 var(--space-2); border-bottom: var(--stroke-2) solid var(--line); background: var(--surface-sunken); border-radius: calc(var(--radius-1) - var(--stroke-2)) calc(var(--radius-1) - var(--stroke-2)) 0 0; }
+.gl-win-accent > .gl-win-bar { background: var(--accent); color: var(--on-accent); }
+.gl-win-title { flex: 1; min-width: 0; font-family: var(--font-mono); font-size: 13px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gl-win-dots { display: inline-flex; gap: var(--space-1); }
+.gl-win-dot { width: 10px; height: 10px; border: var(--stroke-2) solid currentColor; border-radius: var(--radius-pill); box-sizing: border-box; }
+.gl-win-body { padding: var(--space-4); }
+.gl-win-body:last-child { border-radius: 0 0 calc(var(--radius-1) - var(--stroke-2)) calc(var(--radius-1) - var(--stroke-2)); }
+.gl-win-body:only-child { border-radius: calc(var(--radius-1) - var(--stroke-2)); }
+.gl-win-elev3::after { top: 4px; left: 4px; right: -8px; bottom: -8px; }
+
+/* Alert */
+.gl-alert-body { display: flex; gap: var(--space-4); align-items: flex-start; }
+.gl-alert-title { margin: 0; font-weight: 600; }
+.gl-alert-text { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.gl-alert-danger > .gl-win-body { background: var(--danger-soft); }
+.gl-alert-danger .gl-alert-title { color: var(--danger); }
+.gl-alert-info > .gl-win-body { background: var(--accent-soft); }
+.gl-alert-actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+
+/* Card extras */
+.gl-profile { display: flex; gap: var(--space-4); align-items: center; }
+.gl-avatar { width: 64px; height: 64px; flex: none; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1); background: var(--accent-soft); display: grid; place-items: center; color: var(--ink); }
+.gl-dl { display: grid; grid-template-columns: auto 1fr; gap: 2px var(--space-4); margin: 0; font-size: 14px; line-height: 20px; }
+.gl-dl dt { color: var(--ink-muted); }
+.gl-dl dd { margin: 0; font-weight: 500; }
+
+/* Toggle */
+.gl-toggle { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; font-size: 15px; position: relative; }
+.gl-toggle input { appearance: none; -webkit-appearance: none; margin: 0; width: 48px; height: 26px; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-pill); background: var(--surface) repeating-conic-gradient(var(--line-subtle) 0 25%, transparent 0 50%) 0 0 / var(--dither-tile) var(--dither-tile); position: relative; cursor: pointer; box-shadow: var(--elev-1); transition: background var(--dur-quick, 120ms) var(--ease-out, ease-out); }
+.gl-toggle input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; box-sizing: border-box; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-pill); background: var(--surface); transition: transform var(--dur-quick, 120ms) var(--ease-out, ease-out); }
+.gl-toggle input:checked { background: var(--accent); }
+.gl-toggle input:checked::after { transform: translateX(22px); }
+.gl-toggle input:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Checkbox and radio */
+.gl-check, .gl-radio { display: inline-flex; align-items: flex-start; gap: 12px; cursor: pointer; font-size: 15px; line-height: 22px; }
+.gl-check input, .gl-radio input { appearance: none; -webkit-appearance: none; margin: 1px 0 0; flex: none; width: 20px; height: 20px; border: var(--stroke-2) solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; }
+.gl-check input { border-radius: var(--radius-1); }
+.gl-radio input { border-radius: var(--radius-pill); }
+.gl-check input:checked { background: var(--accent); }
+.gl-check input:checked::after { content: ""; width: 9px; height: 5px; border-left: var(--stroke-2) solid var(--on-accent); border-bottom: var(--stroke-2) solid var(--on-accent); transform: translateY(-1px) rotate(-45deg); }
+.gl-radio input:checked::after { content: ""; width: 10px; height: 10px; border-radius: var(--radius-pill); background: var(--ink); }
+.gl-radiolist { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; border: 0; }
+.gl-radiolist legend { padding: 0; margin-bottom: var(--space-2); font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+
+/* Slider */
+.gl-slider { display: flex; flex-direction: column; gap: var(--space-2); min-width: 220px; }
+.gl-slider-head { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+.gl-slider-head b { color: var(--ink); font-weight: 500; }
+.gl-slider input { appearance: none; -webkit-appearance: none; width: 100%; height: 14px; margin: 0; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-pill); box-shadow: var(--elev-1);
+  background: linear-gradient(90deg, var(--accent) 0 var(--gl-fill, 50%), transparent var(--gl-fill, 50%)), repeating-conic-gradient(var(--line-subtle) 0 25%, transparent 0 50%) 0 0 / var(--dither-tile) var(--dither-tile), var(--surface); cursor: pointer; }
+.gl-slider input::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1); background: var(--surface); box-shadow: var(--elev-1); }
+.gl-slider input::-moz-range-thumb { width: 18px; height: 18px; border: var(--stroke-2) solid var(--line); border-radius: var(--radius-1); background: var(--surface); }
+
+/* Progress ring */
+.gl-ring { position: relative; display: inline-grid; place-items: center; }
+.gl-ring svg { display: block; }
+.gl-ring-track { fill: none; }
+.gl-ring-tbase { fill: var(--surface); }
+.gl-ring-tdot { fill: var(--line-subtle); }
+.gl-ring-edge { fill: none; stroke: var(--line); stroke-width: 2; }
+.gl-ring-arc { fill: none; stroke: var(--accent); stroke-linecap: butt; transition: stroke-dashoffset var(--dur-slow, 320ms) var(--ease-out, ease-out); }
+.gl-ring-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.gl-ring-value { font-family: var(--font-mono); font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.gl-ring-label { font-family: var(--font-mono); font-size: 12px; line-height: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+.gl-ring-spark { color: var(--accent-strong); margin-bottom: 2px; }
+
+/* Stat */
+.gl-stat { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-1); min-width: 148px; }
+.gl-stat-label { font-family: var(--font-mono); font-size: 12px; line-height: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-muted); }
+.gl-stat-value { font-family: var(--font-mono); font-size: 44px; line-height: 44px; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.gl-stat-unit { font-size: 15px; letter-spacing: 0; margin-left: var(--space-1); color: var(--ink-muted); }
+.gl-stat-delta { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--success); }
+.gl-stat-delta.is-down { color: var(--ink-muted); }
+
+/* Sparkle */
+.gl-sparkle { display: inline-block; flex: none; vertical-align: middle; }
+.gl-sparkle path { fill: currentColor; }
+.gl-sparkle.is-outlined path { stroke: var(--line); stroke-width: 6; stroke-linejoin: round; paint-order: stroke; }
+
+/* Warp check */
+.gl-warp { display: block; }
+.gl-warp .gl-warp-ground { fill: var(--gl-warp-ground, var(--bg)); }
+.gl-warp .gl-warp-cell { fill: var(--gl-warp-cell, var(--accent)); }
+.gl-warp .gl-warp-star { fill: var(--gl-warp-star, var(--bg)); }
+
+/* Motion. Things press, lift and dissolve: movement runs along the shadow axis; appearing steps through the checker. */
+.gl-twinkle { display: inline-block; flex: none; color: var(--accent-strong); overflow: visible; vertical-align: middle; }
+.gl-twinkle.is-pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+.gl-tw-main, .gl-tw-diag { fill: currentColor; }
+.gl-tw-ring { fill: none; stroke: currentColor; }
+.gl-glintfx { position: relative; display: inline-block; vertical-align: middle; }
+.gl-glintfx-spark { position: absolute; z-index: 2; pointer-events: none; }
+.gl-sheen { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; border-radius: var(--radius-1); }
+.gl-sheen i { position: absolute; top: -30%; bottom: -30%; left: 0; width: 34%; transform: translateX(-140%) skewX(-20deg); }
+.gl-sheen i::before { content: ""; position: absolute; inset: 0; background-image: repeating-conic-gradient(var(--gl-sheen, var(--sheen)) 0 25%, transparent 0 50%); background-size: var(--dither-tile) var(--dither-tile); }
+.gl-sheen i::after { content: ""; position: absolute; top: 0; bottom: 0; left: 38%; width: 24%; background: var(--gl-sheen, var(--sheen)); }
+.gl-sheen.is-on i { animation: glSheen var(--dur-sheen, 560ms) cubic-bezier(.5, 0, .3, 1) both; }
+.gl-sheen.is-rtl.is-on i { animation-name: glSheenRtl; }
+@keyframes glSheen { from { transform: translateX(-140%) skewX(-20deg); } to { transform: translateX(420%) skewX(-20deg); } }
+@keyframes glSheenRtl { from { transform: translateX(420%) skewX(20deg); } to { transform: translateX(-140%) skewX(20deg); } }
+
+/* Dither dissolve: 25 → 50 → 75 → 100% coverage of the 2px checker. Use instead of opacity fades. */
+.gl-dissolve-in, .gl-dissolve-out, .gl-lift-in, .gl-sink-out { -webkit-mask-size: var(--dither-tile) var(--dither-tile); mask-size: var(--dither-tile) var(--dither-tile); }
+.gl-dissolve-in { animation: glDissolveIn var(--dur-base, 200ms) linear both; }
+.gl-dissolve-out { animation: glDissolveOut var(--dur-quick, 120ms) linear both; }
+.gl-lift-in { animation: glDissolveIn var(--dur-base, 200ms) linear both, glLiftIn var(--dur-base, 200ms) var(--ease-out, ease-out) both; }
+.gl-sink-out { animation: glDissolveOut var(--dur-quick, 120ms) linear both, glSinkOut var(--dur-quick, 120ms) var(--ease-in, ease-in) both; }
+.gl-pop { animation: glPop var(--dur-quick, 120ms) var(--ease-pop, ease-out) both; }
+@keyframes glDissolveIn {
+  0%, 24% { -webkit-mask-image: conic-gradient(#000 0 25%, transparent 0); mask-image: conic-gradient(#000 0 25%, transparent 0); }
+  25%, 49% { -webkit-mask-image: repeating-conic-gradient(#000 0 25%, transparent 0 50%); mask-image: repeating-conic-gradient(#000 0 25%, transparent 0 50%); }
+  50%, 74% { -webkit-mask-image: conic-gradient(transparent 0 25%, #000 0); mask-image: conic-gradient(transparent 0 25%, #000 0); }
+  75%, 100% { -webkit-mask-image: none; mask-image: none; }
+}
+@keyframes glDissolveOut {
+  0%, 24% { -webkit-mask-image: none; mask-image: none; }
+  25%, 49% { -webkit-mask-image: conic-gradient(transparent 0 25%, #000 0); mask-image: conic-gradient(transparent 0 25%, #000 0); }
+  50%, 74% { -webkit-mask-image: repeating-conic-gradient(#000 0 25%, transparent 0 50%); mask-image: repeating-conic-gradient(#000 0 25%, transparent 0 50%); }
+  75%, 99% { -webkit-mask-image: conic-gradient(#000 0 25%, transparent 0); mask-image: conic-gradient(#000 0 25%, transparent 0); }
+  100% { visibility: hidden; }
+}
+@keyframes glLiftIn { from { transform: translate(4px, 4px); } to { transform: none; } }
+@keyframes glSinkOut { from { transform: none; } to { transform: translate(4px, 4px); } }
+@keyframes glPop { from { transform: scale(.9); } to { transform: none; } }
+
+/* Checker wipe: square cells step in along the diagonal, the checker's two colours a beat apart */
+.gl-wipe { position: absolute; inset: 0; z-index: 5; overflow: hidden; pointer-events: none; }
+.gl-wipe-cell { position: absolute; background: var(--gl-wipe, var(--accent)); transform: scale(0); }
+.gl-wipe.is-in .gl-wipe-cell { animation: glWipeIn var(--dur-base, 200ms) var(--ease-step, steps(3, end)) both; }
+.gl-wipe.is-out .gl-wipe-cell { animation: glWipeOut var(--dur-base, 200ms) var(--ease-step, steps(3, end)) both; }
+@keyframes glWipeIn { from { transform: scale(0); } to { transform: scale(1.04); } }
+@keyframes glWipeOut { from { transform: scale(1.04); } to { transform: scale(0); } }
+.gl-wipe-glint { position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-50%, -50%); color: var(--on-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-dissolve-in, .gl-dissolve-out, .gl-lift-in, .gl-sink-out, .gl-pop { animation-duration: 1ms !important; }
+  .gl-sheen { display: none; }
+}

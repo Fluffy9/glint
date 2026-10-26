@@ -1,0 +1,21 @@
+<!-- @dsCard group="Motion" height=250 subtitle="Sheen across a surface, then the twinkle" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>GlintFx</title>
+<style>
+  .wrap { padding: 32px 40px 32px 24px; display: flex; gap: 48px; align-items: center; flex-wrap: wrap; }
+  .strap { display: block; width: 260px; height: 72px; border: 2px solid var(--line); border-radius: 36px; overflow: hidden; box-shadow: var(--elev-2); }
+  .cap { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 14px; }
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'wrap' },
+  h('div', null, h(G.GlintFx, { loop: 2400, sparkleSize: 40 }, h(G.Button, { variant: 'primary', brackets: true }, 'Goal hit')), h('div', { className: 'cap' }, 'Loop · button')),
+  h('div', null, h(G.GlintFx, { loop: 2400, sparkleSize: 48, pixel: 24, radius: '36px', corner: 'tr' }, h('span', { className: 'strap' }, h(G.WarpCheck, { cols: 12, rows: 3, cell: 24, width: 260, height: 72 }))), h('div', { className: 'cap' }, 'Pixel twinkle · packaging')),
+  h('div', null, h(G.GlintFx, { trigger: 'hover', sparkleSize: 36 }, h(G.Card, { title: 'Streak', accent: true }, h('span', { className: 'body-sm' }, '7 days. Hover me.'))), h('div', { className: 'cap' }, 'On hover · card'))
+));
+</script>
+</body>
+</html>

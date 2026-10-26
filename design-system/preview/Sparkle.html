@@ -1,0 +1,18 @@
+<!-- @dsCard group="Brand" height=150 subtitle="The four-point star" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../tokens/tokens.css"><link rel="stylesheet" href="../components/bundle.css"><script src="../vendor/react.production.min.js"></script><script src="../vendor/react-dom.production.min.js"></script><script src="../components/bundle.js"></script><script>try{var t=new URLSearchParams(location.search).get("theme")||localStorage.getItem("glintTheme")||"lavender-light";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","lavender-light")}</script><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-row" style="gap:28px"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+function Box(bg, child){ return h('div',{style:{width:'88px',height:'88px',display:'grid',placeItems:'center',background:bg,border:'2px solid var(--line)',borderRadius:'4px',boxShadow:'var(--elev-2)'}}, child); }
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  Box('var(--surface)', h(G.Sparkle,{size:56, color:'var(--ink)', title:'Glint sparkle'})),
+  Box('var(--accent)', h(G.Sparkle,{size:56, color:'var(--bg)', outlined:true})),
+  Box('var(--surface)', h(G.Sparkle,{size:48, color:'var(--accent)', outlined:true})),
+  h('div',{style:{display:'flex',gap:'14px',alignItems:'center',color:'var(--accent-strong)'}}, h(G.Sparkle,{size:32}), h(G.Sparkle,{size:24}), h(G.Sparkle,{size:16}), h(G.Sparkle,{size:12}))
+));
+</script>
+</body>
+</html>

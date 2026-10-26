@@ -1,0 +1,92 @@
+<!-- @dsCard group="Brand" height=580 page subtitle="Drag the hue: one number recolors band, box and app" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../tokens/tokens.css"><link rel="stylesheet" href="../components/bundle.css"><script src="../vendor/react.production.min.js"></script><script src="../vendor/react-dom.production.min.js"></script><script src="../components/bundle.js"></script><script>try{var t=new URLSearchParams(location.search).get("theme")||localStorage.getItem("glintTheme")||"lavender-light";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","lavender-light")}</script>
+<meta charset="utf-8">
+<title>Colorways</title>
+<style>
+  .cw { --accent: oklch(0.82 0.09 var(--hue)); --accent-soft: oklch(0.93 0.04 var(--hue)); --accent-strong: oklch(0.46 0.13 var(--hue)); --focus-ring: var(--accent-strong); padding: 16px 24px 24px 16px; display: flex; flex-direction: column; gap: 24px; }
+  [data-theme$="dark"] .cw { --accent: oklch(0.8 0.09 var(--hue)); --accent-soft: oklch(0.36 0.06 var(--hue)); --accent-strong: oklch(0.86 0.08 var(--hue)); }
+  .ctrl { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-end; }
+  .ctrl .gl-slider { width: 280px; }
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dot { width: 12px; height: 12px; border-radius: 999px; border: 2px solid var(--line); display: inline-block; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .sw { display: flex; gap: 12px; flex-wrap: wrap; }
+  .chip-sw { display: flex; flex-direction: column; gap: 6px; width: 120px; }
+  .chip-sw i { display: block; height: 56px; border: 2px solid var(--line); border-radius: 4px; box-shadow: var(--elev-1); }
+  .chip-sw b { font-family: var(--font-mono); font-size: 12px; line-height: 16px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; }
+  .chip-sw code { font-family: var(--font-mono); font-size: 11px; line-height: 14px; color: var(--ink-muted); }
+  .band { width: 100%; height: auto; display: block; }
+  .strap { fill: var(--accent); stroke: var(--accent-strong); stroke-width: 3; }
+  .deboss { fill: color-mix(in oklch, var(--accent) 80%, #000); }
+  .hilite { fill: color-mix(in oklch, var(--accent) 55%, #fff); }
+  .stitch { fill: none; stroke: color-mix(in oklch, var(--accent) 65%, #000); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .pod { fill: #222024; stroke: var(--line); stroke-width: 2; }
+  .podglint { fill: var(--accent); }
+  .metal { fill: #d9d4cc; stroke: var(--line); stroke-width: 2; }
+  .cap { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--ink-muted); margin: 6px 0 0; }
+  .box { position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 300px; border: 2px solid var(--line); border-radius: 4px; box-shadow: var(--elev-3); overflow: hidden; }
+  .box .gl-warp { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .label { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--surface); border: 2px solid var(--line); border-radius: 4px; box-shadow: var(--elev-2); padding: 10px 18px 12px; text-align: center; }
+  .label .h2 { margin: 0; display: flex; gap: 8px; align-items: center; }
+  .app { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+var PRESETS = [['Lavender', 300], ['Mint', 160], ['Peach', 55], ['Sky', 235], ['Butter', 95], ['Rose', 5]];
+
+function Band() {
+  // a strap with a debossed monogram repeat: sparkle + medallion, on a 36px pitch
+  var S = G.SPARKLE_PATH;
+  return h('svg', { className: 'band', viewBox: '0 0 640 120', role: 'img', 'aria-label': 'Band mockup in the current colorway' },
+    h('defs', null,
+      h('pattern', { id: 'mono', width: 36, height: 36, patternUnits: 'userSpaceOnUse', patternTransform: 'translate(4 6)' },
+        h('path', { className: 'hilite', d: S, transform: 'translate(11.8 11.8) scale(0.12)' }),
+        h('path', { className: 'deboss', d: S, transform: 'translate(11 11) scale(0.12)' }),
+        h('circle', { className: 'deboss', cx: 0, cy: 0, r: 6 }), h('circle', { className: 'deboss', cx: 36, cy: 0, r: 6 }),
+        h('circle', { className: 'deboss', cx: 0, cy: 36, r: 6 }), h('circle', { className: 'deboss', cx: 36, cy: 36, r: 6 })),
+      h('clipPath', { id: 'strapclip' }, h('rect', { x: 20, y: 30, width: 600, height: 60, rx: 30 }))),
+    h('rect', { className: 'strap', x: 20, y: 30, width: 600, height: 60, rx: 30 }),
+    h('rect', { x: 20, y: 30, width: 600, height: 60, fill: 'url(#mono)', clipPath: 'url(#strapclip)' }),
+    h('rect', { className: 'stitch', x: 30, y: 37, width: 580, height: 46, rx: 23 }),
+    h('rect', { className: 'metal', x: 560, y: 24, width: 22, height: 72, rx: 6 }),
+    h('rect', { className: 'pod', x: 250, y: 20, width: 140, height: 80, rx: 22 }),
+    h('path', { className: 'podglint', d: S, transform: 'translate(311 51) scale(0.18)' }));
+}
+
+function Box() {
+  return h('div', { className: 'box' },
+    h(G.WarpCheck, { cols: 8, rows: 8, cell: 40, seed: 7 }),
+    h('div', { className: 'label' }, h('p', { className: 'h2' }, h(G.Sparkle, { size: 24, color: 'var(--ink)' }), 'GLINT')));
+}
+
+function Page() {
+  var s = React.useState(300), hue = s[0];
+  return h('div', { className: 'cw', style: { '--hue': hue } },
+    h('div', { className: 'ctrl' },
+      h(G.Slider, { label: 'Colorway hue', min: 0, max: 359, value: hue, onChange: s[1], format: function (v) { return v + '°'; } }),
+      h('div', { className: 'presets' }, PRESETS.map(function (p) {
+        return h(G.Chip, { key: p[0], selected: hue === p[1], onClick: function () { s[1](p[1]); } }, h('span', { className: 'dot', style: { background: 'oklch(0.82 0.09 ' + p[1] + ')' } }), p[0]);
+      }))),
+    h('div', { className: 'sw' },
+      [['accent', 'oklch(.82 .09 h)'], ['accent-soft', 'oklch(.93 .04 h)'], ['accent-strong', 'oklch(.46 .13 h)'], ['bg', 'fixed'], ['ink', 'fixed']].map(function (t) {
+        return h('div', { key: t[0], className: 'chip-sw' }, h('i', { style: { background: 'var(--' + t[0] + ')' } }), h('b', null, t[0]), h('code', null, t[1]));
+      })),
+    h('div', { className: 'grid' },
+      h('div', null, h(Band), h('p', { className: 'cap' }, 'Band: dyed strap, darker edge paint, debossed sparkle-and-medallion repeat. Pod is the white-label tracker.'),
+        h('div', { className: 'app', style: { marginTop: '24px' } },
+          h(G.ProgressRing, { value: 0.72, display: '7,204', label: 'Steps', size: 140, thickness: 14 }),
+          h('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } },
+            h(G.Button, { variant: 'primary', brackets: true }, 'Sync now'),
+            h('div', { style: { display: 'flex', gap: '8px' } }, h(G.Chip, { selected: true }, 'Run'), h(G.Chip, { variant: 'soft' }, 'Cardio'))))),
+      h('div', null, h(Box), h('p', { className: 'cap' }, 'Box lid: warp check in the band\'s colorway.'))));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Page));
+</script>
+</body>
+</html>

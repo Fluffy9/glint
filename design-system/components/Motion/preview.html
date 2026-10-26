@@ -1,0 +1,51 @@
+<!-- @dsCard group="Foundations" height=800 page subtitle="Press, lift, dissolve. Durations, easing, transitions" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Motion</title>
+<style>
+  .wrap { padding: 16px 24px 32px 16px; display: flex; flex-direction: column; gap: 32px; }
+  .sec { display: flex; flex-direction: column; gap: 14px; }
+  .lbl { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .06em; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .bar { display: grid; grid-template-columns: 96px 1fr 56px; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 12px; line-height: 16px; }
+  .bar i { display: block; height: 12px; border: 2px solid var(--line); border-radius: 2px; background: var(--surface) repeating-conic-gradient(var(--accent) 0 25%, transparent 0 50%) 0 0 / var(--dither-tile) var(--dither-tile); }
+  .bar span:last-child { color: var(--ink-muted); text-align: right; }
+  .ease { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 12px; line-height: 16px; }
+  .track { position: relative; height: 20px; border-bottom: 1px dashed var(--line-subtle); }
+  .dot { position: absolute; left: 0; bottom: 2px; width: 14px; height: 14px; box-sizing: border-box; border: 2px solid var(--line); border-radius: 2px; background: var(--accent); box-shadow: var(--elev-1); animation: glRun 1400ms infinite alternate; }
+  @keyframes glRun { 0%, 12% { left: 0; } 88%, 100% { left: calc(100% - 14px); } }
+  .stage { display: flex; gap: 20px; flex-wrap: wrap; }
+  .demo { display: flex; flex-direction: column; gap: 10px; }
+  .box { position: relative; width: 160px; height: 132px; display: grid; place-items: center; border: 1px dashed var(--line-subtle); border-radius: 4px; }
+  .box .gl-win { width: 132px; }
+  .note { font-size: 14px; line-height: 20px; color: var(--ink-muted); max-width: 160px; }
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+var DUR = [['dur-press', 80], ['dur-quick', 120], ['dur-base', 200], ['dur-slow', 320], ['dur-sheen', 560], ['dur-glint', 900]];
+var EASE = [['ease-out', 'var(--ease-out)'], ['ease-in', 'var(--ease-in)'], ['ease-pop', 'var(--ease-pop)'], ['ease-step', 'steps(6, end)']];
+function Demo(title, note, child) { return h('div', { className: 'demo' }, h('span', { className: 'lbl' }, title), h('div', { className: 'box' }, child), h('span', { className: 'note' }, note)); }
+function Page() {
+  var s = React.useState(0), k = s[0], setK = s[1];
+  React.useEffect(function () { var id = setInterval(function () { setK(function (x) { return x + 1; }); }, 2400); return function () { clearInterval(id); }; }, []);
+  return h('div', { className: 'wrap' },
+    h('div', { className: 'grid2' },
+      h('div', { className: 'sec' }, h('span', { className: 'lbl' }, 'Durations'),
+        DUR.map(function (d) { return h('div', { className: 'bar', key: d[0] }, h('span', null, d[0]), h('i', { style: { width: (d[1] / 900 * 100) + '%' } }), h('span', null, d[1] + 'ms')); })),
+      h('div', { className: 'sec' }, h('span', { className: 'lbl' }, 'Easing'),
+        EASE.map(function (e) { return h('div', { className: 'ease', key: e[0] }, h('span', null, e[0]), h('div', { className: 'track' }, h('span', { className: 'dot', style: { animationTimingFunction: e[1] } }))); }))),
+    h('div', { className: 'sec' }, h('span', { className: 'lbl' }, 'Transitions · replaying every 2.4s'),
+      h('div', { className: 'stage' },
+        Demo('Dissolve in', 'Appear by stepping 25, 50, 75, 100% through the checker. Replaces every fade.', h(G.Card, { key: 'a' + k, title: 'Sleep', className: 'gl-dissolve-in' }, h('span', { className: 'body-sm' }, '7h 42m'))),
+        Demo('Lift in', 'Windows and menus rise out of their own shadow while dissolving in.', h(G.Card, { key: 'b' + k, title: 'Menu', className: 'gl-lift-in', elevation: 3 }, h('span', { className: 'body-sm' }, 'Opened'))),
+        Demo('Sink out', 'Closing sinks into the shadow and dissolves away. Faster than opening.', h(G.Card, { key: 'c' + k, title: 'Dialog', className: 'gl-sink-out', style: { animationDelay: '1000ms' } }, h('span', { className: 'body-sm' }, 'Closing'))),
+        Demo('Earned', 'Overshoot and the glint only for something earned.', h(G.GlintFx, { play: k, sparkleSize: 36, radius: '999px' }, h(G.Chip, { key: 'd' + k, selected: true, className: 'gl-pop' }, 'Goal hit'))),
+        Demo('Press', 'Buttons sink into their shadow in 80ms. Try it.', h(G.Button, { variant: 'primary' }, 'Sync now'))))
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Page));
+</script>
+</body>
+</html>

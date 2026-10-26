@@ -1,0 +1,16 @@
+<!-- @dsCard group="Data" height=170 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-row"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h(G.Stat,{label:'Resting HR', value:'58', unit:'bpm', delta:'−3 vs last week'}),
+  h(G.Stat,{label:'Active', value:'47', unit:'min', delta:'+12 vs avg'}),
+  h(G.Stat,{label:'Sleep', value:'7:42', unit:'h', delta:'−6 min', trend:'down'})
+));
+</script>
+</body>
+</html>

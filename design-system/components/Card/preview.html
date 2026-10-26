@@ -1,0 +1,19 @@
+<!-- @dsCard group="Containers" height=272 subtitle="Window chrome: title bar, body, hard shadow" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;padding:16px 24px 24px 16px"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h(G.Card,{title:'User profile'},
+    h('div',{className:'gl-profile'}, h('div',{className:'gl-avatar'}, h(G.Icon,{name:'user', size:32})),
+      h('dl',{className:'gl-dl'}, h('dt',null,'Name'), h('dd',null,'Maya Lin'), h('dt',null,'Band'), h('dd',null,'Lavender · 41mm'), h('dt',null,'Status'), h('dd',null,'Synced')))),
+  h(G.Card,{title:'Sleep', accent:true, lead:h(G.Icon,{name:'moon', size:16})},
+    h('div',{style:{display:'flex',alignItems:'baseline',gap:'4px'}}, h('span',{className:'metric'},'7:42'), h('span',{style:{color:'var(--ink-muted)'}},'hrs')),
+    h('p',{style:{margin:'8px 0 0',fontSize:'14px',lineHeight:'20px',color:'var(--ink-muted)'}},'38 min more deep sleep than your weekly average.'))
+));
+</script>
+</body>
+</html>

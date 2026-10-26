@@ -1,0 +1,30 @@
+<!-- @dsCard group="Motion" height=300 subtitle="Screen change for onboarding and the site" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>CheckerWipe</title>
+<style>
+  .wrap { padding: 16px 24px 28px 16px; display: flex; gap: 32px; align-items: flex-start; }
+  .screen { position: relative; width: 360px; height: 220px; border: 2px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--surface); box-shadow: var(--elev-2); }
+  .scr { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .big { font-family: var(--font-display); font-size: 40px; line-height: 44px; font-weight: 700; text-transform: uppercase; }
+  .cap { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .06em; }
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+function Demo() {
+  var s = React.useState(0), k = s[0], setK = s[1], t = React.useState(0), scr = t[0], setScr = t[1];
+  React.useEffect(function () { var id = setInterval(function () { setK(function (x) { return x + 1; }); }, 2600); var f = setTimeout(function () { setK(1); }, 300); return function () { clearInterval(id); clearTimeout(f); }; }, []);
+  return h('div', { className: 'wrap' },
+    h('div', { className: 'screen' },
+      scr % 2 === 0
+        ? h('div', { className: 'scr' }, h('span', { className: 'cap' }, 'Step 2 of 3'), h('span', { className: 'big' }, 'Pair band'), h('span', { className: 'body-sm' }, 'Hold the band near your phone.'))
+        : h('div', { className: 'scr', style: { background: 'var(--accent-soft)' } }, h(G.Sparkle, { size: 32, color: 'var(--accent-strong)' }), h('span', { className: 'big' }, 'Paired'), h('span', { className: 'body-sm' }, 'Your band is ready.')),
+      h(G.CheckerWipe, { play: k, cell: 40, onCovered: function () { setScr(function (x) { return x + 1; }); } })),
+    h('div', { className: 'cap', style: { maxWidth: '260px', lineHeight: '20px' } }, 'Cells step in along the diagonal; odd cells a beat behind even ones, so the screen passes through the checker. The swap happens while it is fully covered.'));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

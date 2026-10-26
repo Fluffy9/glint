@@ -1,0 +1,16 @@
+<!-- @dsCard group="Forms" height=288 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-col" style="max-width:420px"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  h(G.Input,{placeholder:'Search workouts…', icon:'search', 'aria-label':'Search workouts'}),
+  h(G.Input,{label:'Daily step goal', defaultValue:'8,000', help:'Most people start between 6,000 and 10,000.'}),
+  h(G.Input,{label:'Band code', defaultValue:'GL-41', error:'Codes are 6 characters, like GL-4K2Q.'})
+));
+</script>
+</body>
+</html>

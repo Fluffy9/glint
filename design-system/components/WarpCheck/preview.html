@@ -1,0 +1,16 @@
+<!-- @dsCard group="Brand" height=300 subtitle="Tileable warped checker with sparkles" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title><style>.frame{border:2px solid var(--line);border-radius:4px;box-shadow:var(--elev-2);overflow:hidden;line-height:0}</style></head>
+<body>
+<div id="root" style="display:flex;gap:24px;padding:16px 24px 24px 16px;flex-wrap:wrap"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h('div',{className:'frame'}, h(G.WarpCheck,{cols:8, rows:6, cell:32, seed:7})),
+  h('div',{className:'frame'}, h(G.WarpCheck,{cols:6, rows:6, cell:40, seed:21, amp:0.36, stars:false})),
+  h('div',{className:'frame', style:{'--gl-warp-cell':'var(--accent-soft)'}}, h(G.WarpCheck,{cols:4, rows:6, cell:40, seed:3, amp:0.22, stars:false}))
+));
+</script>
+</body>
+</html>

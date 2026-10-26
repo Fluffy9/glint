@@ -1,0 +1,15 @@
+<!-- @dsCard group="Forms" height=110 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-col"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h(G.Checkbox,{label:'Share workouts with Apple Health', defaultChecked:true}),
+  h(G.Checkbox,{label:'Email me a weekly summary'})
+));
+</script>
+</body>
+</html>

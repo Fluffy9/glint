@@ -1,0 +1,15 @@
+<!-- @dsCard group="Navigation" height=136 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-col"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h(G.Tabs,{label:'Range', items:[{id:'d',label:'Day'},{id:'w',label:'Week'},{id:'m',label:'Month'}], defaultValue:'w'}),
+  h(G.Tabs,{label:'Account', brackets:true, items:[{id:'o',label:'Overview'},{id:'b',label:'Billing'},{id:'t',label:'Team'}]})
+));
+</script>
+</body>
+</html>

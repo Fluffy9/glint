@@ -1,0 +1,32 @@
+<!-- @dsCard group="Motion" height=340 subtitle="The glint: pop, stretch, turn, collapse" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../tokens/tokens.css"><link rel="stylesheet" href="../components/bundle.css"><script src="../vendor/react.production.min.js"></script><script src="../vendor/react-dom.production.min.js"></script><script src="../components/bundle.js"></script><script>try{var t=new URLSearchParams(location.search).get("theme")||localStorage.getItem("glintTheme")||"lavender-light";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","lavender-light")}</script><meta charset="utf-8"><title>Twinkle</title>
+<style>
+  .wrap { padding: 16px 24px 28px 16px; display: flex; flex-direction: column; gap: 24px; }
+  .row { display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap; }
+  .tile { width: 120px; height: 120px; display: grid; place-items: center; border: 2px solid var(--line); border-radius: 4px; box-shadow: var(--elev-2); }
+  .film { display: flex; border: 2px solid var(--line); border-radius: 4px; background: var(--surface); }
+  .fr { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 4px 4px; border-right: 1px dashed var(--line-subtle); }
+  .fr:last-child { border-right: 0; }
+  .fr code { font-family: var(--font-mono); font-size: 11px; line-height: 14px; color: var(--ink-muted); }
+  .cap { font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--ink-muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 6px; }
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+var T = [0.04, 0.1, 0.18, 0.26, 0.36, 0.5, 0.64, 0.78, 0.9];
+ReactDOM.createRoot(document.getElementById('root')).render(h('div', { className: 'wrap' },
+  h('div', { className: 'row' },
+    h('div', null, h('div', { className: 'tile', style: { background: 'var(--accent)' } }, h(G.Twinkle, { size: 104, loop: 900, color: 'var(--sheen)' })), h('div', { className: 'cap' }, 'Vector · on accent')),
+    h('div', null, h('div', { className: 'tile', style: { background: 'var(--surface)' } }, h(G.Twinkle, { size: 104, loop: 900, delay: 300 })), h('div', { className: 'cap' }, 'Vector · on surface')),
+    h('div', null, h('div', { className: 'tile', style: { background: 'var(--accent)' } }, h(G.Twinkle, { size: 104, pixel: 24, loop: 900, delay: 150, color: 'var(--sheen)' })), h('div', { className: 'cap' }, 'Pixel 24 · 12fps')),
+    h('div', null, h('div', { className: 'tile', style: { background: 'var(--surface)' } }, h(G.Twinkle, { size: 104, pixel: 16, loop: 900, delay: 450 })), h('div', { className: 'cap' }, 'Pixel 16 · 12fps'))),
+  h('div', null,
+    h('div', { className: 'film' }, T.map(function (t) { return h('div', { className: 'fr', key: t }, h(G.Twinkle, { size: 72, autoplay: false, restAt: t }), h('code', null, Math.round(t * 900) + 'ms')); })),
+    h('div', { className: 'cap' }, 'One glint, 900ms: pop with overshoot to 200ms · hold · collapse to a point'))
+));
+</script>
+</body>
+</html>

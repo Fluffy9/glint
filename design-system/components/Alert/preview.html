@@ -1,0 +1,16 @@
+<!-- @dsCard group="Feedback" height=488 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-col" style="max-width:460px"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h(G.Alert,{tone:'warning', barTitle:'System alert', title:'Band battery at 10%', onClose:function(){}}, 'Charge for 20 minutes to keep tonight\'s sleep tracking.'),
+  h(G.Alert,{tone:'danger', title:'Sync failed', actions:h(G.Button,{size:'sm', variant:'primary'},'Try again')}, 'Your band is out of range. Bring it within a few feet of your phone.'),
+  h(G.Alert,{tone:'success', title:'Goal hit'}, 'Five days in a row. That\'s a new streak.')
+));
+</script>
+</body>
+</html>

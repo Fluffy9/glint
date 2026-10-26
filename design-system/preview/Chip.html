@@ -1,0 +1,20 @@
+<!-- @dsCard group="Forms" height=128 subtitle="Removable and toggle chips" -->
+<!doctype html>
+<html lang="en">
+<head><link rel="stylesheet" href="../tokens/tokens.css"><link rel="stylesheet" href="../components/bundle.css"><script src="../vendor/react.production.min.js"></script><script src="../vendor/react-dom.production.min.js"></script><script src="../components/bundle.js"></script><script>try{var t=new URLSearchParams(location.search).get("theme")||localStorage.getItem("glintTheme")||"lavender-light";document.documentElement.setAttribute("data-theme",t)}catch(e){document.documentElement.setAttribute("data-theme","lavender-light")}</script><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-col"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+function Demo(){
+  var s = React.useState({run:true, ride:false, swim:false}), on = s[0];
+  function t(k){ return function(){ var n = Object.assign({}, on); n[k] = !n[k]; s[1](n); }; }
+  var row = {display:'flex',gap:'8px',flexWrap:'wrap',alignItems:'center'};
+  return h(React.Fragment,null,
+    h('div',{style:row}, h('span',{className:'gl-lbl'},'Removable'), h(G.Chip,{onRemove:function(){}},'This week'), h(G.Chip,{variant:'soft', onRemove:function(){}},'Cardio'), h(G.Chip,{selected:true, onRemove:function(){}},'Outdoors')),
+    h('div',{style:row}, h('span',{className:'gl-lbl'},'Toggle'), h(G.Chip,{selected:on.run, onClick:t('run')},'Run'), h(G.Chip,{selected:on.ride, onClick:t('ride')},'Ride'), h(G.Chip,{selected:on.swim, onClick:t('swim')},'Swim')));
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(Demo));
+</script>
+</body>
+</html>

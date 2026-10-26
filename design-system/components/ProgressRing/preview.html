@@ -1,0 +1,16 @@
+<!-- @dsCard group="Data" height=230 subtitle="The home screen's one glanceable status" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-row" style="gap:32px;align-items:flex-end"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment,null,
+  h(G.ProgressRing,{value:0.62, display:'6,204', label:'Steps'}),
+  h(G.ProgressRing,{value:1, display:'10,118', label:'Goal hit'}),
+  h(G.ProgressRing,{value:0.35, size:96, thickness:12, label:'Move'})
+));
+</script>
+</body>
+</html>

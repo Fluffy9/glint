@@ -1,0 +1,19 @@
+<!-- @dsCard group="Actions" height=304 subtitle="Primary, hover, pressed, disabled" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Preview</title></head>
+<body>
+<div id="root" class="gl-col"></div>
+<script>
+var G = window.Glint, h = React.createElement;
+function Row(l, el){ return h('div', {style:{display:'flex',gap:'16px',alignItems:'center',flexWrap:'wrap'}}, h('span',{className:'gl-lbl'}, l), el); }
+ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+  Row('Primary', h(React.Fragment,null, h(G.Button,{variant:'primary', brackets:true},'Sync now'), h(G.Button,{variant:'primary', icon:'bolt'},'Start workout'))),
+  Row('Hover', h(G.Button,{variant:'primary', brackets:true, state:'hover'},'Sync now')),
+  Row('Pressed', h(G.Button,{variant:'primary', brackets:true, state:'active'},'Sync now')),
+  Row('Disabled', h(G.Button,{variant:'primary', brackets:true, disabled:true},'Sync now')),
+  Row('Others', h(React.Fragment,null, h(G.Button,null,'Edit goal'), h(G.Button,{variant:'ghost'},'Skip'), h(G.Button,{variant:'danger'},'Unpair band'), h(G.Button,{icon:'search', label:'Search'})))
+));
+</script>
+</body>
+</html>

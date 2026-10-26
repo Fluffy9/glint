@@ -2,7 +2,7 @@ import { KEY_VERSION } from "./state";
 
 const ITERATIONS = 100_000;
 
-function bytesToBase64(bytes: Uint8Array): string {
+export function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) binary += String.fromCharCode(byte);
   return btoa(binary);
@@ -66,4 +66,15 @@ export async function decryptWithPassphrase(blob: CipherBlob, passphrase: string
     asBuffer(blob.ciphertext),
   );
   return new Uint8Array(plain);
+}
+
+/** Throwaway plaintext used by the local emulator account loop. */
+export const TEST_BACKUP_PLAINTEXT = "glint-local-backup";
+
+export function bytesMatch(left: Uint8Array, right: Uint8Array): boolean {
+  if (left.byteLength !== right.byteLength) return false;
+  for (let index = 0; index < left.byteLength; index += 1) {
+    if (left[index] !== right[index]) return false;
+  }
+  return true;
 }

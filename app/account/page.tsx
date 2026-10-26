@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { AccountPanel } from "@/components/account-panel";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { WarpCheck } from "@/components/warp-check";
 import { copy, fill, pageTitle } from "@/content";
 
 export const metadata: Metadata = {
@@ -11,13 +12,18 @@ export const metadata: Metadata = {
 
 export default function AccountPage() {
   return (
-    <div className="site">
+    <div className="site site-account">
       <SiteHeader />
-      <article className="prose">
-        <h1 className="h1">{copy.account.title}</h1>
-        <p>{copy.account.description}</p>
-        <AccountPanel />
-      </article>
+      <main className="account-stage">
+        <div className="account-stage-field" aria-hidden>
+          <WarpCheck cols={36} rows={28} cell={48} seed={41} />
+        </div>
+        <div className="account-panel-shell gl-win">
+          <h1 className="h1">{copy.account.title}</h1>
+          <p className="account-lede">{copy.account.description}</p>
+          <AccountPanel />
+        </div>
+      </main>
       <SiteFooter />
     </div>
   );

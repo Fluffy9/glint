@@ -4,6 +4,7 @@ import {
   claimEntitlementUrl,
   deleteAccountUrl,
   latestEmulatorSignInLink,
+  getEncryptedBackup,
   putEncryptedBackup,
   sendEmailLink,
   signInWithEmailLink,
@@ -58,12 +59,13 @@ describe("Firebase Auth REST", () => {
     expect(fetchImpl).toHaveBeenCalledOnce();
   });
 
-  it("points development with no project keys at the local emulators", () => {
+  it("points development with no project keys at the same-origin emulator proxy", () => {
     const targets = firebaseTargets({ NODE_ENV: "development" });
     expect(targets?.emulators).toBe(true);
     expect(targets?.projectId).toBe("glint-local");
+    expect(targets?.storageBase).toBe("/__glint/storage/v0/b/glint-local.appspot.com/o");
     expect(functionUrl(targets!, "claimEntitlement")).toBe(
-      "http://127.0.0.1:5001/glint-local/us-central1/claimEntitlement",
+      "/__glint/functions/glint-local/us-central1/claimEntitlement",
     );
     expect(firebaseTargets({ NODE_ENV: "production" })).toBeNull();
     expect(
@@ -76,18 +78,19 @@ describe("Firebase Auth REST", () => {
   });
 
   it("reads the newest emulator sign-in link for that email", async () => {
-    const fetchImpl = vi.fn(async () =>
-      Response.json({
+    const fetchImpl = vi.fn(async (url: string) => {
+      expect(url).toBe("/__glint/auth/emulator/v1/projects/glint-local/oobCodes");
+      return Response.json({
         oobCodes: [
           { email: "a@b.co", oobLink: "http://127.0.0.1:9099/old" },
           { email: "other@b.co", oobLink: "http://127.0.0.1:9099/other" },
           { email: "a@b.co", oobLink: "http://127.0.0.1:9099/new" },
         ],
-      }),
-    );
-    await expect(latestEmulatorSignInLink(fetchImpl, "glint-local", "a@b.co")).resolves.toBe(
-      "http://127.0.0.1:9099/new",
-    );
+      });
+    });
+    await expect(
+      latestEmulatorSignInLink(fetchImpl, "glint-local", "a@b.co", "/__glint/auth"),
+    ).resolves.toBe("http://127.0.0.1:9099/new");
   });
 
   it("uploads ciphertext then writes the object record", async () => {
@@ -114,5 +117,20 @@ describe("Firebase Auth REST", () => {
       ciphertext: new Uint8Array([1, 2, 3]),
     });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it("downloads ciphertext from storage", async () => {
+    const fetchImpl = vi.fn(async (url: string, init?: RequestInit) => {
+      expect(String(url)).toContain("/o/backups%2Fuid_1%2Fheart%2Fobj_1?alt=media");
+      expect(init?.headers).toMatchObject({ authorization: "Firebase tok" });
+      return new Response(new Uint8Array([9, 8, 7]));
+    });
+    await expect(
+      getEncryptedBackup(fetchImpl, {
+        storageBase: "/__glint/storage/v0/b/glint-local.appspot.com/o",
+        idToken: "tok",
+        objectPath: "backups/uid_1/heart/obj_1",
+      }),
+    ).resolves.toEqual(new Uint8Array([9, 8, 7]));
   });
 });

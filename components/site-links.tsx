@@ -1,8 +1,33 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { copy } from "@/content";
+import {
+  ACCOUNT_SESSION_EVENT,
+  clearAccountSession,
+  readAccountSession,
+} from "@/lib/account-session";
 import { ModeToggle } from "./mode-toggle";
 
 export function SiteLinks() {
+  const [ready, setReady] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    const sync = () => {
+      setSignedIn(readAccountSession() !== null);
+      setReady(true);
+    };
+    sync();
+    window.addEventListener(ACCOUNT_SESSION_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(ACCOUNT_SESSION_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
   return (
     <>
       <nav className="site-links" aria-label={copy.nav.site}>
@@ -11,10 +36,31 @@ export function SiteLinks() {
         <Link href="/security">{copy.nav.security}</Link>
       </nav>
       <div className="site-actions">
-        <Link className="site-signin" href="/login">
-          <UserIcon />
-          {copy.nav.signIn}
-        </Link>
+        {!ready ? (
+          <span className="site-signin-skeleton" role="status" aria-label={copy.account.checking} />
+        ) : signedIn ? (
+          <>
+            <Link className="site-signin" href="/account">
+              <UserIcon />
+              {copy.nav.account}
+            </Link>
+            <button
+              type="button"
+              className="site-signin"
+              onClick={() => {
+                clearAccountSession();
+                setSignedIn(false);
+              }}
+            >
+              {copy.nav.signOut}
+            </button>
+          </>
+        ) : (
+          <Link className="site-signin" href="/account">
+            <UserIcon />
+            {copy.nav.signIn}
+          </Link>
+        )}
         <ModeToggle />
       </div>
     </>

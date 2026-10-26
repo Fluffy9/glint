@@ -29,7 +29,7 @@ In another terminal, `pnpm dev`, then record a paid year and open the account pa
 pnpm seed:purchase buyer@example.com
 ```
 
-Open `http://localhost:3000/account` or `http://127.0.0.1:3000/account` and stay on that host. Use the seeded email. The emulator does not send mail. Click “Open the sign-in link”, then save a test backup with a passphrase of at least 8 characters. Type `DELETE` to remove the account. Real Stripe Payment Links can hit the same webhook:
+Open `http://localhost:3000/account` or `http://127.0.0.1:3000/account` and stay on that host. The account page proxies emulator calls through `/__glint/*` so the browser stays same-origin. Use the seeded email. The emulator does not send mail. Click “Open the sign-in link”, then save a test backup with any passphrase of at least 8 characters. Type `DELETE` to remove the account. Real Stripe Payment Links can hit the same webhook:
 
 ```sh
 stripe listen --forward-to http://127.0.0.1:5001/glint-local/us-central1/stripeWebhook

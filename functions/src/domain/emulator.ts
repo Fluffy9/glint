@@ -4,6 +4,14 @@ export const LOCAL_REGION = "us-central1";
 export const LOCAL_WEBHOOK_SECRET = "whsec_local_emulator";
 export const LOCAL_STRIPE_KEY = "sk_test_local";
 
+/** Same-origin Next rewrites → Firebase emulators (see next.config.ts). */
+export const EMULATOR_PROXY = {
+  auth: "/__glint/auth",
+  functions: "/__glint/functions",
+  firestore: "/__glint/firestore",
+  storage: "/__glint/storage",
+} as const;
+
 export type FirebaseTargets = {
   emulators: boolean;
   apiKey: string;
@@ -28,10 +36,11 @@ export function firebaseTargets(env: {
       emulators: true,
       apiKey: LOCAL_API_KEY,
       projectId: LOCAL_PROJECT_ID,
-      authBase: "http://127.0.0.1:9099/identitytoolkit.googleapis.com/v1",
-      functionsBase: `http://127.0.0.1:5001/${LOCAL_PROJECT_ID}/${LOCAL_REGION}`,
-      firestoreBase: `http://127.0.0.1:8180/v1/projects/${LOCAL_PROJECT_ID}/databases/(default)/documents`,
-      storageBase: `http://127.0.0.1:9199/v0/b/${bucket}/o`,
+      // Browser stays on the Next origin; rewrites reach 127.0.0.1 emulators.
+      authBase: `${EMULATOR_PROXY.auth}/identitytoolkit.googleapis.com/v1`,
+      functionsBase: `${EMULATOR_PROXY.functions}/${LOCAL_PROJECT_ID}/${LOCAL_REGION}`,
+      firestoreBase: `${EMULATOR_PROXY.firestore}/v1/projects/${LOCAL_PROJECT_ID}/databases/(default)/documents`,
+      storageBase: `${EMULATOR_PROXY.storage}/v0/b/${bucket}/o`,
       bucket,
     };
   }
@@ -51,4 +60,11 @@ export function firebaseTargets(env: {
 
 export function functionUrl(targets: FirebaseTargets, name: string): string {
   return `${targets.functionsBase}/${name}`;
+}
+
+export function emulatorAuthOrigin(authBase: string): string {
+  if (authBase.startsWith("/")) {
+    return authBase.replace(/\/identitytoolkit\.googleapis\.com\/v1\/?$/, "") || EMULATOR_PROXY.auth;
+  }
+  return new URL(authBase).origin;
 }

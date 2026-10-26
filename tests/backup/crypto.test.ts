@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { decryptWithPassphrase, encryptWithPassphrase } from "../../functions/src/domain/crypto";
+import {
+  bytesMatch,
+  decryptWithPassphrase,
+  encryptWithPassphrase,
+  TEST_BACKUP_PLAINTEXT,
+} from "../../functions/src/domain/crypto";
 import { KEY_VERSION } from "../../functions/src/domain/state";
 
 describe("passphrase backup crypto", () => {
@@ -15,5 +20,12 @@ describe("passphrase backup crypto", () => {
     const opened = await decryptWithPassphrase(blob, "correct horse");
     expect(new TextDecoder().decode(opened)).toBe("heart-rate-sample");
     await expect(decryptWithPassphrase(blob, "wrong horse")).rejects.toThrow();
+  });
+
+  it("matches the local loop plaintext after a round trip", async () => {
+    const plain = new TextEncoder().encode(TEST_BACKUP_PLAINTEXT);
+    const blob = await encryptWithPassphrase(plain, "passphrase1");
+    const opened = await decryptWithPassphrase(blob, "passphrase1");
+    expect(bytesMatch(opened, plain)).toBe(true);
   });
 });

@@ -5,7 +5,7 @@ const emulatorConnect =
 
 export function contentSecurityPolicy(
   nonce: string,
-  options?: { inlineStyles?: boolean; emulators?: boolean },
+  options?: { inlineStyles?: boolean; emulators?: boolean; unsafeEval?: boolean },
 ): string {
   const styleSrc = options?.inlineStyles
     ? "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
@@ -13,10 +13,14 @@ export function contentSecurityPolicy(
   const connectSrc = options?.emulators
     ? `connect-src 'self' ${emulatorConnect} https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://*.cloudfunctions.net`
     : "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://*.cloudfunctions.net";
+  // React's development build uses eval for call stacks. Production never needs it.
+  const scriptSrc = options?.unsafeEval
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    scriptSrc,
     styleSrc,
     // React sets layout/transform via style attributes (slide box + accents).
     "style-src-attr 'unsafe-inline'",
@@ -40,6 +44,7 @@ export function applySecurityHeaders(
       // The Next.js dev indicator injects style elements. Production stays closed.
       inlineStyles: !options.isProduction,
       emulators: !options.isProduction,
+      unsafeEval: !options.isProduction,
     }),
   );
   headers.set("X-Content-Type-Options", "nosniff");

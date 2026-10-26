@@ -1,4 +1,4 @@
-import { LOCAL_REGION } from "./emulator";
+import { emulatorAuthOrigin, LOCAL_REGION } from "./emulator";
 
 export function deleteAccountUrl(projectId: string, region = LOCAL_REGION): string {
   return `https://${region}-${projectId}.cloudfunctions.net/deleteAccount`;
@@ -37,23 +37,27 @@ export async function sendEmailLink(
   if (!response.ok) throw new Error("sign-in email failed");
   const data = (await response.json().catch(() => null)) as { oobLink?: string } | null;
   if (data?.oobLink) return { oobLink: data.oobLink };
-  if (!projectId || !authBase.includes("127.0.0.1") && !authBase.includes("localhost")) {
+  const localAuth =
+    authBase.startsWith("/") ||
+    authBase.includes("127.0.0.1") ||
+    authBase.includes("localhost");
+  if (!projectId || !localAuth) {
     return { oobLink: null };
   }
-  const origin = new URL(authBase).origin;
-  const listed = await fetchImpl(`${origin}/emulator/v1/projects/${projectId}/oobCodes`);
-  if (!listed.ok) return { oobLink: null };
-  const codes = (await listed.json()) as { oobCodes?: { email?: string; oobLink?: string }[] };
-  const match = codes.oobCodes?.filter((code) => code.email === email).at(-1);
-  return { oobLink: match?.oobLink ?? null };
+  return {
+    oobLink: (
+      await latestEmulatorSignInLink(fetchImpl, projectId, email, emulatorAuthOrigin(authBase))
+    ),
+  };
 }
 
 export async function latestEmulatorSignInLink(
   fetchImpl: FetchLike,
   projectId: string,
   email: string,
+  authOrigin = "http://127.0.0.1:9099",
 ): Promise<string | null> {
-  const response = await fetchImpl(`http://127.0.0.1:9099/emulator/v1/projects/${projectId}/oobCodes`);
+  const response = await fetchImpl(`${authOrigin}/emulator/v1/projects/${projectId}/oobCodes`);
   if (!response.ok) return null;
   const data = (await response.json()) as { oobCodes?: { email?: string; oobLink?: string }[] };
   const links = (data.oobCodes ?? []).filter((item) => item.email === email && item.oobLink);
@@ -102,7 +106,7 @@ export async function putEncryptedBackup(
     },
     body: new Blob([input.ciphertext.buffer.slice(input.ciphertext.byteOffset, input.ciphertext.byteOffset + input.ciphertext.byteLength) as ArrayBuffer]),
   });
-  if (!upload.ok) throw new Error("upload failed");
+  if (!upload.ok) throw new Error("backup upload failed");
 
   const record = await fetchImpl(
     `${input.firestoreBase}/users/${input.uid}/objects?documentId=${encodeURIComponent(input.objectId)}`,
@@ -123,7 +127,27 @@ export async function putEncryptedBackup(
       }),
     },
   );
-  if (!record.ok) throw new Error("object record failed");
+  if (!record.ok) throw new Error("backup record failed");
+}
+
+export async function getEncryptedBackup(
+  fetchImpl: FetchLike,
+  input: {
+    storageBase: string;
+    idToken: string;
+    objectPath: string;
+  },
+): Promise<Uint8Array> {
+  const response = await fetchImpl(
+    `${input.storageBase}/${encodeURIComponent(input.objectPath)}?alt=media`,
+    {
+      headers: {
+        authorization: `Firebase ${input.idToken}`,
+      },
+    },
+  );
+  if (!response.ok) throw new Error("backup download failed");
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 export async function callAuthedFunction(

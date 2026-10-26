@@ -200,3 +200,11 @@ button.gl-btn {
 a.gl-btn {
   text-decoration: none;
 }
+
+.buy-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}

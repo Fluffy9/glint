@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { BuyForm } from "@/components/buy-form";
 import { ProgressSample } from "@/components/progress-sample";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { formatUsd } from "@/lib/money";
+import { getDisplayPrices } from "@/lib/prices";
 
 const promises = [
   {
@@ -18,7 +21,9 @@ const promises = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const prices = await getDisplayPrices();
+
   return (
     <div className="site">
       <SiteHeader />
@@ -37,7 +42,7 @@ export default function Home() {
               <Link className="gl-btn gl-btn-primary" href="#band">
                 [ Get the band ]
               </Link>
-              <p className="price-note">$69.99 once</p>
+              <p className="price-note">{formatUsd(prices.bandCents)} usd once</p>
             </div>
           </div>
         </div>
@@ -111,12 +116,11 @@ export default function Home() {
             </div>
             <div className="gl-win-body">
               <p className="gl-stat-value" style={{ margin: 0 }}>
-                69.99<span className="gl-stat-unit">usd</span>
+                {formatUsd(prices.bandCents)}
+                <span className="gl-stat-unit">usd</span>
               </p>
               <p>Once. The band works with no subscription.</p>
-              <Link className="gl-btn gl-btn-primary" href="#band">
-                [ Get the band ]
-              </Link>
+              <BuyForm enabled={prices.checkoutEnabled} backupCents={prices.backupCents} />
             </div>
           </article>
           <article className="gl-win">
@@ -125,7 +129,8 @@ export default function Home() {
             </div>
             <div className="gl-win-body">
               <p className="gl-stat-value" style={{ margin: 0 }}>
-                10<span className="gl-stat-unit">usd / year</span>
+                {formatUsd(prices.backupCents)}
+                <span className="gl-stat-unit">usd / year</span>
               </p>
               <p>
                 Optional. You choose what leaves the phone. Cancel backup and

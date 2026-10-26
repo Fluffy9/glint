@@ -1,18 +1,19 @@
 import Link from "next/link";
+import { copy } from "@/content";
 import { ModeToggle } from "./mode-toggle";
 
 export function SiteLinks() {
   return (
     <>
-      <nav className="site-links" aria-label="Site">
-        <Link href="/pricing">Pricing</Link>
-        <Link href="/privacy">Privacy</Link>
-        <Link href="/security">Security</Link>
+      <nav className="site-links" aria-label={copy.nav.site}>
+        <Link href="/pricing">{copy.nav.pricing}</Link>
+        <Link href="/privacy">{copy.nav.privacy}</Link>
+        <Link href="/security">{copy.nav.security}</Link>
       </nav>
       <div className="site-actions">
         <Link className="site-signin" href="/login">
           <UserIcon />
-          Sign in
+          {copy.nav.signIn}
         </Link>
         <ModeToggle />
       </div>

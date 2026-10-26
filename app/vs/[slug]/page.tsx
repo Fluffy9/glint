@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { CompetitorTable } from "@/components/competitor-table";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { copy, fill } from "@/content";
+import { site } from "@/content/site";
 import { competitorBySlug, competitors } from "@/lib/competitors";
 
 type Params = { slug: string };
@@ -16,9 +18,10 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const { slug } = await params;
   const competitor = competitorBySlug(slug);
   if (!competitor) return {};
+  const filled = { competitor: competitor.name };
   return {
-    title: `Glint vs ${competitor.name} · Glint`,
-    description: competitor.intro,
+    title: `${fill(copy.compare.cardTitle, filled)} · ${site.name}`,
+    description: fill(competitor.intro, filled),
   };
 }
 
@@ -26,16 +29,17 @@ export default async function CompetitorPage({ params }: { params: Promise<Param
   const { slug } = await params;
   const competitor = competitorBySlug(slug);
   if (!competitor) notFound();
+  const filled = { competitor: competitor.name };
 
   return (
     <div className="site">
       <SiteHeader />
       <article className="prose compare-page">
-        <h1 className="h1">Glint vs {competitor.name}</h1>
-        <p>{competitor.intro}</p>
+        <h1 className="h1">{fill(copy.compare.cardTitle, filled)}</h1>
+        <p>{fill(competitor.intro, filled)}</p>
         <CompetitorTable competitor={competitor} />
         <p>
-          <Link href="/pricing">Glint pricing.</Link>
+          <Link href="/pricing">{fill(copy.compare.pricingLink)}</Link>
         </p>
       </article>
       <SiteFooter />

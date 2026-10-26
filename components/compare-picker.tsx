@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { CompetitorTable } from "@/components/competitor-table";
+import type { CopyVars } from "@/content";
 import { competitors } from "@/lib/competitors";
 
-export function ComparePicker() {
+export function ComparePicker({ vars }: { vars?: Partial<CopyVars> }) {
   const [slug, setSlug] = useState(competitors[0].slug);
 
   return (
@@ -41,7 +42,7 @@ export function ComparePicker() {
               aria-hidden={!selected}
               inert={!selected ? true : undefined}
             >
-              <CompetitorTable competitor={competitor} heading="h3" />
+              <CompetitorTable competitor={competitor} heading="h3" vars={vars} />
             </div>
           );
         })}

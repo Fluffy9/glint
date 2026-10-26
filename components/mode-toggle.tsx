@@ -1,5 +1,6 @@
 "use client";
 
+import { copy, fill } from "@/content";
 import { useAppearance } from "./appearance-provider";
 
 export function ModeToggle() {
@@ -11,7 +12,7 @@ export function ModeToggle() {
       type="button"
       className="nav-mode"
       aria-pressed={mode === "dark"}
-      aria-label={`Switch to ${next} mode`}
+      aria-label={fill(copy.nav.switchMode, { mode: next })}
       onClick={() => setMode(next)}
     >
       {mode === "light" ? <MoonIcon /> : <SunIcon />}

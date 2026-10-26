@@ -1,7 +1,16 @@
 import { ComparePicker } from "@/components/compare-picker";
 import { WarpCheck } from "@/components/warp-check";
+import { copy, fill, priceVars } from "@/content";
+import type { DisplayPrices } from "@/lib/prices";
+import { fallbackPrices } from "@/lib/prices";
 
-export function CompareSection() {
+export function CompareSection({
+  prices = fallbackPrices,
+}: {
+  prices?: Pick<DisplayPrices, "bandCents" | "backupCents">;
+}) {
+  const vars = priceVars(prices);
+
   return (
     <section className="section" aria-labelledby="compare">
       <div className="compare-band">
@@ -10,13 +19,11 @@ export function CompareSection() {
         </div>
         <div className="compare-band-copy">
           <h2 id="compare" className="h2">
-            Glint vs the usual stack
+            {fill(copy.compare.heading, vars)}
           </h2>
-          <p className="section-lede">
-            Whoop bills by the year. Fitbit Air, Helio Strap, and Polar Loop sell the band once. Glint is $69.99 once.
-          </p>
+          <p className="section-lede">{fill(copy.compare.lede, vars)}</p>
         </div>
-        <ComparePicker />
+        <ComparePicker vars={vars} />
       </div>
     </section>
   );

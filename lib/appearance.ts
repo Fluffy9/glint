@@ -1,16 +1,16 @@
-export const bandColors = [
-  { id: "lavender", label: "Lavender" },
-  { id: "mint", label: "Mint" },
-  { id: "peach", label: "Peach" },
-  { id: "sky", label: "Sky" },
-] as const;
+import { site, type ProductColorId } from "@/content/site";
 
-export type BandColor = (typeof bandColors)[number]["id"];
+export const bandColors = site.colors.map((color) => ({
+  id: color.id,
+  label: color.label,
+}));
+
+export type BandColor = ProductColorId;
 export type AppearanceMode = "light" | "dark";
 
 export function themeAttribute(band: BandColor, mode: AppearanceMode): string {
   return `${band}-${mode}`;
 }
 
-export const defaultBand: BandColor = "lavender";
-export const defaultMode: AppearanceMode = "light";
+export const defaultBand: BandColor = site.defaultColor;
+export const defaultMode: AppearanceMode = site.defaultMode;

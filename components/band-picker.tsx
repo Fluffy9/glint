@@ -1,5 +1,6 @@
 "use client";
 
+import { copy } from "@/content";
 import { bandColors, type BandColor } from "@/lib/appearance";
 import { useAppearance } from "./appearance-provider";
 
@@ -16,7 +17,7 @@ export function BandPicker({ onSelect, busy = false }: Props) {
     <div
       className="band-picker"
       role="group"
-      aria-label="Band colour"
+      aria-label={copy.nav.bandColour}
       aria-busy={busy || undefined}
     >
       {bandColors.map((option) => (

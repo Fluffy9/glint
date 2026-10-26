@@ -4,7 +4,7 @@ import { FaqSection } from "@/components/faq-section";
 import { FeaturesSection } from "@/components/features-section";
 import { HomeHero } from "@/components/home-hero";
 import { SiteFooter } from "@/components/site-footer";
-import { formatUsd } from "@/lib/money";
+import { copy, fill, priceVars } from "@/content";
 import { fallbackPrices, getDisplayPrices, type DisplayPrices } from "@/lib/prices";
 
 const disabledPrices: DisplayPrices = { ...fallbackPrices, checkoutEnabled: false };
@@ -24,12 +24,12 @@ async function HomeWithPrices() {
 function HomeBody({ prices }: { prices: DisplayPrices }) {
   return (
     <>
-      <HomeHero priceNote={`${formatUsd(prices.bandCents)} usd once`} />
+      <HomeHero priceNote={fill(copy.hero.priceNote, priceVars(prices))} />
 
       <div className="site">
         <FeaturesSection />
-        <CompareSection />
-        <FaqSection />
+        <CompareSection prices={prices} />
+        <FaqSection prices={prices} />
         <SiteFooter />
       </div>
     </>

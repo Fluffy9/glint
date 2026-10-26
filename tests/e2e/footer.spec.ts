@@ -38,7 +38,7 @@ test("lists every site page in footer sections", async ({ page }) => {
 
   const bar = footer(page);
   await expect(bar).toBeVisible();
-  await expect(bar.getByRole("link", { name: "Pupcakes" })).toHaveAttribute(
+  await expect(bar.getByRole("link", { name: "@Pupcakes" })).toHaveAttribute(
     "href",
     "https://pupcakes.me",
   );

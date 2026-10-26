@@ -1,3 +1,4 @@
+import { site, type ProductColorId } from "@/content/site";
 import {
   annulusPath,
   patternPath,
@@ -150,19 +151,13 @@ export function boxMetrics({
   };
 }
 
-export const BAND_HUE = {
-  lavender: 300,
-  mint: 160,
-  peach: 55,
-  sky: 235,
-} as const;
+export const BAND_HUE = Object.fromEntries(site.colors.map((color) => [color.id, color.hue])) as {
+  [K in ProductColorId]: number;
+};
 
-export const BAND_LABEL = {
-  lavender: "Lavender",
-  mint: "Mint",
-  peach: "Peach",
-  sky: "Sky",
-} as const;
+export const BAND_LABEL = Object.fromEntries(site.colors.map((color) => [color.id, color.label])) as {
+  [K in ProductColorId]: string;
+};
 
 export function colorwayVars(hue: number) {
   return {

@@ -1,28 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import {
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type AnimationEvent as ReactAnimationEvent,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { useMemo, useState } from "react";
+import { useAppearance } from "@/components/appearance-provider";
+import { boxPaint, useBandWipe, washStyle } from "@/components/band-wipe";
 import { BandPicker } from "@/components/band-picker";
 import { PackagingDev } from "@/components/glint-box/packaging-dev";
 import { SlideBox } from "@/components/glint-box/slide-box";
 import { SiteLinks } from "@/components/site-links";
-import { useAppearance } from "@/components/appearance-provider";
-import type { BandColor } from "@/lib/appearance";
-import {
-  BAND_HUE,
-  BAND_LABEL,
-  boxMetrics,
-  colorwayVars,
-  type BoxMm,
-} from "@/lib/glint-box/metrics";
+import { useBoxDrag } from "@/components/use-box-drag";
+import { BAND_LABEL, boxMetrics, type BoxMm } from "@/lib/glint-box/metrics";
 import { MARK_PATH, type PatternId } from "@/lib/glint-box/patterns";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -31,132 +18,28 @@ type Props = {
   priceNote: string;
 };
 
-type Wipe = { from: BandColor; to: BandColor };
-
-function prefersReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function washStyle(band: BandColor): CSSProperties {
-  const colors = colorwayVars(BAND_HUE[band]);
-  return {
-    "--wash-hi": colors.bgHi,
-    "--wash-lo": colors.bgLo,
-  } as CSSProperties;
-}
-
-function boxPaint(band: BandColor): CSSProperties {
-  const colors = colorwayVars(BAND_HUE[band]);
-  return {
-    "--gb-accent": colors.accent,
-    "--gb-deep": colors.deep,
-    "--gb-hl": colors.hl,
-    "--gb-strong": colors.strong,
-    "--gb-deepink": colors.deepink,
-  } as CSSProperties;
-}
-
 export function HomeHero({ priceNote }: Props) {
-  const { band, setBand } = useAppearance();
-  const [wipe, setWipe] = useState<Wipe | null>(null);
-  const wipeRef = useRef<Wipe | null>(null);
-  const pendingRef = useRef<BandColor | null>(null);
-  const bandRef = useRef(band);
-  bandRef.current = band;
-  wipeRef.current = wipe;
-
-  const paintBand = wipe?.to ?? band;
-  const colors = colorwayVars(BAND_HUE[paintBand]);
-
-  const [rx, setRx] = useState(-24);
-  const [ry, setRy] = useState(-36);
+  const { band, mode, setBand } = useAppearance();
+  const { wipe, paintBand, chooseBand, finishWipe } = useBandWipe(band, setBand);
+  const { rx, ry, onPointerDown, onPointerMove, onPointerUp } = useBoxDrag();
   const [slide, setSlide] = useState(0);
   const [pat, setPat] = useState<PatternId>("warpSpark");
   const [mm, setMm] = useState<BoxMm>([110, 110, 60]);
   const [devOpen, setDevOpen] = useState(false);
-  const drag = useRef<{ x: number; y: number; rx: number; ry: number } | null>(
-    null,
-  );
 
   const metrics = useMemo(
     () => boxMetrics({ mm, pat, slide, id: "hero" }),
     [mm, pat, slide],
   );
 
-  const onDown = useCallback(
-    (e: ReactPointerEvent<HTMLDivElement>) => {
-      drag.current = { x: e.clientX, y: e.clientY, rx, ry };
-      e.currentTarget.setPointerCapture(e.pointerId);
-    },
-    [rx, ry],
-  );
-
-  const onMove = useCallback((e: ReactPointerEvent<HTMLDivElement>) => {
-    const g = drag.current;
-    if (!g) return;
-    setRy(g.ry + (e.clientX - g.x) * 0.4);
-    setRx(Math.max(-70, Math.min(10, g.rx - (e.clientY - g.y) * 0.3)));
-  }, []);
-
-  const onUp = useCallback(() => {
-    drag.current = null;
-  }, []);
-
-  const chooseBand = useCallback(
-    (next: BandColor) => {
-      const active = wipeRef.current;
-      const showing = active?.to ?? bandRef.current;
-      if (next === showing) {
-        pendingRef.current = null;
-        return;
-      }
-      if (prefersReducedMotion()) {
-        pendingRef.current = null;
-        wipeRef.current = null;
-        setWipe(null);
-        setBand(next);
-        return;
-      }
-      if (active) {
-        pendingRef.current = next;
-        return;
-      }
-      const started = { from: bandRef.current, to: next };
-      wipeRef.current = started;
-      setWipe(started);
-    },
-    [setBand],
-  );
-
-  const finishWipe = useCallback(
-    (event: ReactAnimationEvent<HTMLDivElement>) => {
-      if (event.target !== event.currentTarget) return;
-      if (!event.animationName.includes("heroColorWipe")) return;
-      const current = wipeRef.current;
-      if (!current) return;
-      const queued = pendingRef.current;
-      pendingRef.current = null;
-      setBand(current.to);
-      if (queued && queued !== current.to) {
-        const follow = { from: current.to, to: queued };
-        wipeRef.current = follow;
-        setWipe(follow);
-      } else {
-        wipeRef.current = null;
-        setWipe(null);
-      }
-    },
-    [setBand],
-  );
-
   return (
     <section className="home-hero" style={boxPaint(paintBand)} aria-label="Glint">
-      <div className="home-hero-wash" style={washStyle(wipe?.from ?? band)} aria-hidden />
+      <div className="home-hero-wash" style={washStyle(wipe?.from ?? band, mode)} aria-hidden />
       {wipe ? (
         <div
           key={`${wipe.from}-${wipe.to}`}
           className="home-hero-wash is-incoming"
-          style={washStyle(wipe.to)}
+          style={washStyle(wipe.to, mode)}
           onAnimationEnd={finishWipe}
           aria-hidden
         />
@@ -184,10 +67,10 @@ export function HomeHero({ priceNote }: Props) {
 
       <div
         className="home-hero-stage"
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={onUp}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
         aria-label="Packaging box, drag to turn"
       >
         <div className="home-hero-box">
@@ -213,7 +96,6 @@ export function HomeHero({ priceNote }: Props) {
           slide={slide}
           pat={pat}
           mm={mm}
-          accent={colors.accent}
           onSlide={setSlide}
           onPat={setPat}
           onMm={setMm}

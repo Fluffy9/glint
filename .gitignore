@@ -37,6 +37,9 @@ yarn-error.log*
 # design-system delivery archive
 *.zip
 
+# reference renders for the packaging mockup; the site draws the box itself
+packaging/**/renders/
+
 # vercel
 .vercel
 

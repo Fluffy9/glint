@@ -1,0 +1,226 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=1360"><title>Glint slide box</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&amp;family=Pixelify+Sans:wght@400..700&amp;display=swap">
+<style>
+body{margin:0}
+.pat{fill:var(--deep)}
+.spk{fill:var(--deep)}
+.ink{fill:#29252c}
+.face{position:absolute;box-sizing:border-box;overflow:hidden;background:var(--accent)}
+.face svg{position:absolute;left:0;top:0;display:block}
+@keyframes glSway{0%{transform:rotateY(-6deg)}50%{transform:rotateY(6deg)}100%{transform:rotateY(-6deg)}}
+@keyframes glFloat{0%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-14px) rotate(8deg)}100%{transform:translateY(0) rotate(0deg)}}
+.sway{animation:glSway 9s ease-in-out infinite;transform-style:preserve-3d}
+.float1{animation:glFloat 6s ease-in-out infinite}
+.float2{animation:glFloat 7.5s ease-in-out infinite 1.2s}
+.float3{animation:glFloat 5.5s ease-in-out infinite 0.6s}
+.chip{cursor:pointer}
+.chip:focus-visible{outline:3px solid #29252c;outline-offset:2px}
+.stage{cursor:grab;touch-action:none}
+.stage:active{cursor:grabbing}
+.p3{transform-style:preserve-3d}
+</style>
+
+<style>html,body{margin:0;background:#f1ecf8}#wrap{transform-origin:0 0}</style></head><body><div id="wrap"></div>
+<script>
+var DCLogic=function(p){this.props=p;this.state={};};DCLogic.prototype.setState=function(s){Object.assign(this.state,s);window.__render()};
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { rx: -24, ry: -36, hue: null, pat: 'warpCheck', size: null, view: 'single', slide: 1 }; this._cache = {}; }
+  lib() {
+    if (this._lib) return this._lib;
+    var SP = [[50,0],[53,35],[65,47],[100,50],[65,53],[53,65],[50,100],[47,65],[35,53],[0,50],[35,47],[47,35],[50,0]];
+    function f(n) { return String(Math.round(n * 10) / 10); }
+    function pts(cx, cy, r) { var k = r / 50; return SP.map(function (a) { return f(cx + (a[0] - 50) * k) + ' ' + f(cy + (a[1] - 50) * k); }); }
+    function path(q) { return 'M' + q[0] + 'C' + q[1] + ' ' + q[2] + ' ' + q[3] + 'C' + q[4] + ' ' + q[5] + ' ' + q[6] + 'C' + q[7] + ' ' + q[8] + ' ' + q[9] + 'C' + q[10] + ' ' + q[11] + ' ' + q[12] + 'Z'; }
+    function sp(cx, cy, r) { return path(pts(cx, cy, r)); }
+    function spR(cx, cy, r) { return path(pts(cx, cy, r).reverse()); }
+    function sq(x, y, w, h) { return 'M' + f(x) + ' ' + f(y) + 'h' + f(w) + 'v' + f(h === undefined ? w : h) + 'h' + f(-w) + 'Z'; }
+    function circ(cx, cy, r) { return 'M' + f(cx - r) + ' ' + f(cy) + 'a' + f(r) + ' ' + f(r) + ' 0 1 0 ' + f(2 * r) + ' 0a' + f(r) + ' ' + f(r) + ' 0 1 0 ' + f(-2 * r) + ' 0Z'; }
+    function dia(cx, cy, r) { return 'M' + f(cx) + ' ' + f(cy - r) + 'L' + f(cx + r) + ' ' + f(cy) + 'L' + f(cx) + ' ' + f(cy + r) + 'L' + f(cx - r) + ' ' + f(cy) + 'Z'; }
+    function warp(W, H, u, o) {
+      var c = o.c * u, a = c * 0.3, T = Math.PI * 2, N = o.N || 8, d = '';
+      function dx(y) { return a * Math.sin(T * y / (c * 4) + 0.7) + 0.4 * a * Math.sin(T * y / (c * 2) + 2); }
+      function dy(x) { return a * Math.sin(T * x / (c * 8) + 1.3) + 0.4 * a * Math.sin(T * x / (c * 3) + 0.2); }
+      var rot = (o.rot || 0) * Math.PI / 180, cr = Math.cos(rot), sr = Math.sin(rot), mx = W / 2, my = H / 2;
+      function Qp(x, y) { var px = x + dx(y), py = y + dy(x); if (!rot) return [px, py]; var qx = px - mx, qy = py - my; return [mx + qx * cr - qy * sr, my + qx * sr + qy * cr]; }
+      function Q(x, y) { var p = Qp(x, y); return f(p[0]) + ' ' + f(p[1]); }
+      var i0 = -1, i1 = Math.ceil(W / c), j0 = -1, j1 = Math.ceil(H / c), R;
+      if (rot) { R = Math.ceil(Math.sqrt(W * W + H * H) / 2 / c) + 2; i0 = Math.floor(mx / c) - R; i1 = Math.ceil(mx / c) + R; j0 = Math.floor(my / c) - R; j1 = Math.ceil(my / c) + R; }
+      for (var j = j0; j <= j1; j++) for (var i = i0; i <= i1; i++) {
+        if (((i + j) % 2 + 2) % 2) continue;
+        var x0 = i * c, y0 = j * c, q = [], t;
+        for (t = 0; t < N; t++) q.push(Q(x0 + c * t / N, y0));
+        for (t = 0; t < N; t++) q.push(Q(x0 + c, y0 + c * t / N));
+        for (t = 0; t < N; t++) q.push(Q(x0 + c - c * t / N, y0 + c));
+        for (t = 0; t < N; t++) q.push(Q(x0, y0 + c - c * t / N));
+        d += 'M' + q.join('L') + 'Z';
+        if (o.spark && ((((i * 73 + j * 151) % 9) + 9) % 9) === 0) { var p = Qp(x0 + c / 2, y0 + c / 2); d += spR(p[0], p[1], c * 0.34); }
+      }
+      return d;
+    }
+    var P = {
+      plain: function () { return ''; },
+      warpCheck: function (W, H, u) { return warp(W, H, u, { c: 25 }); },
+      warpFine: function (W, H, u) { return warp(W, H, u, { c: 13, N: 5 }); },
+      warpDiag: function (W, H, u) { return warp(W, H, u, { c: 24, rot: 45, N: 6 }); },
+      warpSpark: function (W, H, u) { return warp(W, H, u, { c: 30, spark: true }); },
+      sparklePlus: function (W, H, u) {
+        var p = 28 * u, d = '';
+        for (var y = -p; y <= H + p; y += p) for (var x = -p; x <= W + p; x += p) {
+          d += sp(x, y, 6 * u);
+          var a = 4 * u, t = 1.8 * u, cx = x + p / 2, cy = y + p / 2;
+          d += sq(cx - a, cy - t / 2, 2 * a, t) + sq(cx - t / 2, cy - a, t, 2 * a);
+        }
+        return d;
+      },
+      houndstooth: function (W, H, u) {
+        var q = 6 * u, d = '', cols = Math.ceil(W / q) + 1, rows = Math.ceil(H / q) + 1;
+        for (var j = 0; j < rows; j++) {
+          var run = -1;
+          for (var i = 0; i <= cols; i++) {
+            var up = ((i + j) % 4) < 2, dark = i <= cols - 1 && (up ? (i % 8) < 4 : (j % 8) < 4);
+            if (dark && run < 0) run = i;
+            if (!dark && run >= 0) { d += sq(run * q, j * q, (i - run) * q, q); run = -1; }
+          }
+        }
+        return d;
+      },
+      wiggle: function (W, H, u) {
+        var s = 18 * u, a = 4 * u, L = 24 * u, t = 3.6 * u, d = '';
+        for (var y0 = -s; y0 <= H + s; y0 += s) {
+          var top = [], bot = [];
+          for (var x = -L; x <= W + L; x += L / 8) { var y = y0 + a * Math.sin(2 * Math.PI * x / L); top.push(f(x) + ' ' + f(y - t / 2)); bot.unshift(f(x) + ' ' + f(y + t / 2)); }
+          d += 'M' + top.join('L') + 'L' + bot.join('L') + 'Z';
+        }
+        return d;
+      },
+      starLattice: function (W, H, u) {
+        var p = 22 * u, d = '';
+        for (var y = -p; y <= H + p; y += p) for (var x = -p; x <= W + p; x += p) d += sp(x, y, 7.5 * u) + dia(x + p / 2, y + p / 2, 2.4 * u);
+        return d;
+      },
+      bubbles: function (W, H, u) {
+        var T = 64 * u, C = [[8,10,5],[30,6,2.5],[48,18,7],[14,38,3],[36,34,4.5],[58,44,2.5],[24,56,6],[50,58,3.5],[4,58,2]], S = [[40,46,5],[10,24,4]], d = '';
+        for (var ty = -T; ty <= H + T; ty += T) for (var tx = -T; tx <= W + T; tx += T) {
+          C.forEach(function (c) { d += circ(tx + c[0] * u, ty + c[1] * u, c[2] * u); });
+          S.forEach(function (c) { d += sp(tx + c[0] * u, ty + c[1] * u, c[2] * u * 1.3); });
+        }
+        return d;
+      },
+      pixelField: function (W, H, u) {
+        var q = 2.6 * u, n = 7, p = 34 * u, rowH = p * 0.75, d = '', cells = [];
+        for (var j = 0; j < n; j++) for (var i = 0; i < n; i++) {
+          var a = Math.abs((i + 0.5) / n - 0.5) * 2, b = Math.abs((j + 0.5) / n - 0.5) * 2;
+          if (Math.pow(a, 0.6) + Math.pow(b, 0.6) <= 1.02) cells.push([i, j]);
+        }
+        for (var r = -1; r * rowH <= H + rowH; r++) {
+          var y = r * rowH, off = ((r % 2) + 2) % 2 ? p / 2 : 0;
+          for (var x = off - p; x <= W + p; x += p) {
+            cells.forEach(function (c) { d += sq(x - n * q / 2 + c[0] * q, y - n * q / 2 + c[1] * q, q); });
+            d += sq(x + p / 2 - q * 0.6, y - q * 0.6, q * 1.2);
+          }
+        }
+        return d;
+      }
+    };
+    this._lib = { sp: sp, circ: circ, P: P };
+    return this._lib;
+  }
+  pat(name, W, H, u) {
+    var key = name + ':' + W + ':' + H + ':' + u;
+    if (!(key in this._cache)) this._cache[key] = this.lib().P[name](W, H, u);
+    return this._cache[key];
+  }
+  renderVals() {
+    var self = this, L = this.lib(), sp = L.sp, circ = L.circ;
+    var hue = this.state.hue ?? this.props.hue ?? 300;
+    var SIZES = [['Band box · 110×110×60', [110, 110, 60]], ['Gift · 160×160×90', [160, 160, 90]], ['Bundle · 220×140×80', [220, 140, 80]], ['Cube · 120', [120, 120, 120]]];
+    var mm = this.state.size || [this.props.width ?? 110, this.props.depth ?? 110, this.props.height ?? 60];
+    var outlined = (this.props.look ?? 'soft') === 'outlined';
+    var WAYS = [['Lavender', 300], ['Mint', 160], ['Peach', 55], ['Sky', 235], ['Butter', 95]];
+    var wayName = 'Custom';
+    WAYS.forEach(function (w) { if (w[1] === hue) wayName = w[0]; });
+    var PATS = [['plain', 'Plain'], ['warpCheck', 'Wavy check · large'], ['warpFine', 'Wavy check · fine'], ['warpDiag', 'Wavy check · diagonal'], ['warpSpark', 'Wavy check · sparkle cut'], ['starLattice', 'Star lattice'], ['pixelField', 'Pixel field'], ['sparklePlus', 'Sparkle & plus'], ['houndstooth', 'Houndstooth'], ['bubbles', 'Bubbles'], ['wiggle', 'Wiggle']];
+    var COMPARE = [['warpCheck', 'Wavy check · large'], ['warpFine', 'Wavy check · fine'], ['warpDiag', 'Wavy check · diagonal'], ['warpSpark', 'Wavy check · sparkle cut']];
+    var compare = this.state.view === 'compare', frac = this.state.slide;
+    var ink = '#29252c';
+    function box(patName, label, idx) {
+      var s = compare ? 1.35 : 3.0;
+      var W = Math.round(mm[0] * s), D = Math.round(mm[1] * s), H = Math.round(mm[2] * s);
+      var t = Math.max(3, Math.round(s * 1.4)), Wt = W - 6, Dt = D - 2 * t, Ht = H - 2 * t;
+      var sl = Math.round(frac * W * 0.7), u = s * 0.4, uc = s * 0.25, minSide = Math.min(W, D);
+      var wordFs = Math.max(12, Math.round(minSide * 0.17)), capFs = Math.max(7, Math.round(minSide * 0.045));
+      var visW = sl - 3, R = Math.min(Dt * 0.4, visW * 0.46), showCoil = R >= 14, r = R * 0.62, Ri = Math.max(1, Math.round(R));
+      var coilD = showCoil ? 2 * Ri : 2;
+      var cx = compare ? 206 + 316 * idx : 680, cy = compare ? 290 : 330;
+      var shW = Math.round((W + D) * 0.95 + sl * 0.5), shH = Math.round(50 + D * 0.35);
+      return {
+        cx: cx, cy: cy, label: label, labelDisplay: compare ? 'block' : 'none', labelTop: Math.round(H * 0.55 + D * 0.3 + 40),
+        shW: shW, shH: shH, shL: -Math.round(shW / 2), shT: Math.round(H * 0.55 - 12),
+        W: W, D: D, H: H, W2: W / 2, D2: D / 2, H2: H / 2, nW2: -W / 2, nD2: -D / 2, nH2: -H / 2,
+        Wt: Wt, Dt: Dt, Ht: Ht, Wt2: Wt / 2, Dt2: Dt / 2, Ht2: Ht / 2, nWt2: -Wt / 2, nDt2: -Dt / 2, nHt2: -Ht / 2,
+        sl: sl, shift: -Math.round(sl / 2), frame: Math.max(3, Math.round(s * 2.2)),
+        patF: self.pat(patName, W, H, u),
+        stripL: Math.round(Wt - visW), stripL2: Math.round(Wt - visW) + 6, stripDisplay: sl > 3 ? 'block' : 'none',
+        coilD: coilD, coilL: showCoil ? Math.round(Wt - visW / 2 - R) : 0, coilT: Math.round(Dt / 2 - R), coilDisplay: showCoil ? 'block' : 'none',
+        clipId: 'coil' + idx, clipRef: 'url(#coil' + idx + ')',
+        annulus: showCoil ? circ(Ri, Ri, Ri) + circ(Ri, Ri, r) : 'M0 0',
+        patCoil: showCoil ? self.pat('starLattice', coilD, coilD, uc) : '',
+        coilStroke: outlined ? ink : 'rgba(41,37,44,0.22)',
+        endMark: Math.round(Math.min(Dt, Ht) * 0.4),
+        wordFs: wordFs, capFs: capFs, markPx: Math.round(wordFs * 1.1), gap: Math.round(wordFs * 0.4), ts: Math.max(2, Math.round(wordFs * 0.07)),
+        sparkBox: 10, spA: Math.round(wordFs * 0.8), spB: Math.round(wordFs * 0.5),
+        stPadX: Math.round(capFs * 1.0), stPadY: Math.round(capFs * 0.6), stShadow: outlined ? '2px 2px 0 0 ' + ink : '0 2px 6px rgba(41,37,44,0.18)'
+      };
+    }
+    var boxes = compare ? COMPARE.map(function (p, i) { return box(p[0], p[1], i); }) : [box(this.state.pat, '', 0)];
+    var b0 = boxes[0], wd = b0.W + b0.D;
+    return {
+      c: { accent: 'oklch(0.82 0.09 ' + hue + ')', deep: 'oklch(0.7 0.1 ' + hue + ')', hl: 'oklch(0.91 0.05 ' + hue + ')', strong: 'oklch(0.55 0.13 ' + hue + ')', deepink: 'oklch(0.36 0.1 ' + hue + ')', bgHi: 'oklch(0.97 0.018 ' + hue + ')', bgLo: 'oklch(0.89 0.045 ' + hue + ')' },
+      wayName: wayName, dims: mm[0] + ' × ' + mm[1] + ' × ' + mm[2] + ' mm',
+      rx: this.state.rx, ry: this.state.ry,
+      edge: outlined ? '2px solid ' + ink : '0', labelEdge: outlined ? '2px solid ' + ink : '0',
+      mark: sp(50, 50, 50), boxes: boxes,
+      floatDisplay: compare ? 'none' : 'block',
+      s1x: Math.round(680 - wd * 0.62 - 30 - b0.sl * 0.3), s2x: Math.round(680 + wd * 0.55 + b0.sl * 0.4), s3x: Math.round(680 + wd * 0.62 + 10 + b0.sl * 0.4),
+      down: function (e) { self.drag = { x: e.clientX, y: e.clientY, rx: self.state.rx, ry: self.state.ry }; if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId); },
+      move: function (e) { var g = self.drag; if (!g) return; self.setState({ ry: g.ry + (e.clientX - g.x) * 0.4, rx: Math.max(-70, Math.min(10, g.rx - (e.clientY - g.y) * 0.3)) }); },
+      up: function () { self.drag = null; },
+      views: [['single', 'One box'], ['compare', 'Compare wavy checks']].map(function (z) { var on = z[0] === self.state.view; return { name: z[1], selected: on, bg: on ? 'oklch(0.82 0.09 ' + hue + ')' : '#fffaf2', pick: function () { self.setState({ view: z[0] }); } }; }),
+      slides: [[0, 'Closed'], [0.5, 'Half'], [1, 'Open']].map(function (z) { var on = z[0] === frac; return { name: z[1], selected: on, bg: on ? 'oklch(0.82 0.09 ' + hue + ')' : '#fffaf2', pick: function () { self.setState({ slide: z[0] }); } }; }),
+      sizes: SIZES.map(function (z) { var on = z[1][0] === mm[0] && z[1][1] === mm[1] && z[1][2] === mm[2]; return { name: z[0], selected: on, bg: on ? 'oklch(0.82 0.09 ' + hue + ')' : '#fffaf2', pick: function () { self.setState({ size: z[1] }); } }; }),
+      pats: PATS.map(function (z) { var on = !compare && z[0] === self.state.pat; return { name: z[1], selected: on, bg: on ? 'oklch(0.82 0.09 ' + hue + ')' : '#fffaf2', pick: function () { self.setState({ pat: z[0], view: 'single' }); } }; }),
+      ways: WAYS.map(function (z) { var on = z[1] === hue; return { name: z[0], dot: 'oklch(0.82 0.09 ' + z[1] + ')', selected: on, bg: on ? 'oklch(0.82 0.09 ' + z[1] + ')' : '#fffaf2', pick: function () { self.setState({ hue: z[1] }); } }; })
+    };
+  }
+}
+
+var TPL="\n\n<div style=\"width: 1360px; height: 1000px; box-sizing: border-box; position: relative; overflow: hidden; color: #29252c; font-family: 'DM Mono', monospace; background: radial-gradient(ellipse 70% 60% at 50% 42%, {{c.bgHi}}, {{c.bgLo}}); --accent: {{c.accent}}; --deep: {{c.deep}}; --hl: {{c.hl}}; --strong: {{c.strong}}; --deepink: {{c.deepink}}\">\n<div style=\"position: absolute; left: 48px; top: 40px; display: flex; flex-direction: column; gap: 6px\">\n<span style=\"font-size: 12px; line-height: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: #5f5862\">Glint \u00b7 Packaging \u00b7 slide box</span>\n<span style=\"font-family: 'Pixelify Sans', monospace; font-size: 40px; line-height: 44px; font-weight: 700\">{{wayName}} box</span>\n</div>\n<div style=\"position: absolute; right: 48px; top: 40px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px\">\n<span style=\"font-size: 12px; line-height: 16px; letter-spacing: 0.12em; text-transform: uppercase; color: #5f5862\">Sleeve size</span>\n<span style=\"font-size: 22px; line-height: 28px; font-weight: 500; font-variant-numeric: tabular-nums\">{{dims}}</span>\n</div>\n\n<div class=\"stage\" data-stage aria-label=\"3D box, drag to turn\" style=\"position: absolute; left: 0; top: 96px; width: 1360px; height: 650px\">\n<sc-for list=\"{{boxes}}\" as=\"b\" hint-placeholder-count=\"1\">\n<div style=\"position: absolute; left: {{b.cx}}px; top: {{b.cy}}px; width: 0; height: 0; perspective: 1900px; perspective-origin: 0px -140px\">\n\n<div style=\"position: absolute; left: {{b.shL}}px; top: {{b.shT}}px; width: {{b.shW}}px; height: {{b.shH}}px; border-radius: 50%; background: radial-gradient(closest-side, rgba(41,37,44,0.30), rgba(41,37,44,0)); filter: blur(6px)\"></div>\n\n<div class=\"sway\" style=\"position: absolute; left: 0; top: 0; width: 0; height: 0\">\n<div data-rot class=\"p3\" style=\"position: absolute; left: 0; top: 0; width: 0; height: 0; transform: rotateX({{rx}}deg) rotateY({{ry}}deg)\">\n<div class=\"p3\" style=\"position: absolute; left: 0; top: 0; width: 0; height: 0; transform: translateX({{b.shift}}px)\">\n\n<!-- tray (cream, slides out of the sleeve toward +X) -->\n<div class=\"p3\" style=\"position: absolute; left: 0; top: 0; width: 0; height: 0; transform: translateX({{b.sl}}px)\">\n\n<div class=\"face\" style=\"width: {{b.Wt}}px; height: {{b.Dt}}px; left: {{b.nWt2}}px; top: {{b.nDt2}}px; transform: rotateX(90deg) translateZ({{b.Ht2}}px); border: {{edge}}; background: #fffaf2\">\n<div style=\"position: absolute; left: {{b.stripL}}px; top: 0; bottom: 0; width: 6px; display: {{b.stripDisplay}}; background: conic-gradient(rgba(41,37,44,0.30) 25%, transparent 0 50%, rgba(41,37,44,0.30) 0 75%, transparent 0) 0 0 / 6px 6px\"></div>\n<div style=\"position: absolute; left: {{b.stripL2}}px; top: 0; bottom: 0; width: 6px; display: {{b.stripDisplay}}; background: conic-gradient(rgba(41,37,44,0.22) 25%, transparent 0) 0 0 / 6px 6px\"></div>\n<svg width=\"{{b.coilD}}\" height=\"{{b.coilD}}\" viewBox=\"0 0 {{b.coilD}} {{b.coilD}}\" aria-hidden=\"true\" style=\"left: {{b.coilL}}px; top: {{b.coilT}}px; display: {{b.coilDisplay}}; filter: drop-shadow(3px 3px 0 rgba(41,37,44,0.20))\">\n<defs><clipPath id=\"{{b.clipId}}\"><path clip-rule=\"evenodd\" d=\"{{b.annulus}}\"></path></clipPath></defs>\n<path fill-rule=\"evenodd\" d=\"{{b.annulus}}\" style=\"fill: var(--accent)\"></path>\n<g clip-path=\"{{b.clipRef}}\"><path class=\"pat\" d=\"{{b.patCoil}}\"></path></g>\n<path fill-rule=\"evenodd\" d=\"{{b.annulus}}\" style=\"fill: none; stroke: {{b.coilStroke}}; stroke-width: 2\"></path>\n</svg>\n<div style=\"position: absolute; right: 8px; bottom: 6px; font-size: {{b.capFs}}px; line-height: 1; letter-spacing: 0.16em; text-transform: uppercase; color: var(--strong)\">Slide \u2192</div>\n</div>\n\n<div class=\"face\" style=\"width: {{b.Wt}}px; height: {{b.Ht}}px; left: {{b.nWt2}}px; top: {{b.nHt2}}px; transform: translateZ({{b.Dt2}}px); border: {{edge}}; background: #fffaf2\">\n<div style=\"position: absolute; inset: 0; background: rgba(41,37,44,0.05)\"></div>\n</div>\n<div class=\"face\" style=\"width: {{b.Wt}}px; height: {{b.Ht}}px; left: {{b.nWt2}}px; top: {{b.nHt2}}px; transform: rotateY(180deg) translateZ({{b.Dt2}}px); border: {{edge}}; background: #fffaf2\">\n<div style=\"position: absolute; inset: 0; background: rgba(41,37,44,0.16)\"></div>\n</div>\n\n<div class=\"face\" style=\"width: {{b.Dt}}px; height: {{b.Ht}}px; left: {{b.nDt2}}px; top: {{b.nHt2}}px; transform: rotateY(90deg) translateZ({{b.Wt2}}px); border: {{edge}}; background: #fffaf2; box-shadow: inset 0 0 0 {{b.frame}}px var(--accent)\">\n<div style=\"position: absolute; inset: 0; display: flex; align-items: center; justify-content: center\">\n<svg width=\"{{b.endMark}}\" height=\"{{b.endMark}}\" viewBox=\"0 0 100 100\" aria-hidden=\"true\" style=\"position: static\"><path style=\"fill: var(--strong)\" d=\"{{mark}}\"></path></svg>\n</div>\n<div style=\"position: absolute; inset: 0; background: rgba(41,37,44,0.03)\"></div>\n</div>\n<div class=\"face\" style=\"width: {{b.Dt}}px; height: {{b.Ht}}px; left: {{b.nDt2}}px; top: {{b.nHt2}}px; transform: rotateY(-90deg) translateZ({{b.Wt2}}px); border: {{edge}}; background: #fffaf2\">\n<div style=\"position: absolute; inset: 0; background: rgba(41,37,44,0.22)\"></div>\n</div>\n\n</div>\n\n<!-- sleeve (pastel, pattern on the long sides only, open at both ends) -->\n<div class=\"face\" style=\"width: {{b.W}}px; height: {{b.D}}px; left: {{b.nW2}}px; top: {{b.nD2}}px; transform: rotateX(90deg) translateZ({{b.H2}}px); border: {{edge}}; background-image: linear-gradient(150deg, rgba(255,255,255,0.32), rgba(255,255,255,0) 42%, rgba(41,37,44,0.07)); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.35)\">\n<svg width=\"{{b.sparkBox}}\" height=\"{{b.sparkBox}}\" viewBox=\"0 0 100 100\" aria-hidden=\"true\" style=\"left: 10%; top: 12%; width: {{b.spA}}px; height: {{b.spA}}px\"><path style=\"fill: #fffaf2\" d=\"{{mark}}\"></path></svg>\n<svg width=\"{{b.sparkBox}}\" height=\"{{b.sparkBox}}\" viewBox=\"0 0 100 100\" aria-hidden=\"true\" style=\"left: 82%; top: 20%; width: {{b.spB}}px; height: {{b.spB}}px\"><path style=\"fill: var(--strong)\" d=\"{{mark}}\"></path></svg>\n<svg width=\"{{b.sparkBox}}\" height=\"{{b.sparkBox}}\" viewBox=\"0 0 100 100\" aria-hidden=\"true\" style=\"left: 13%; top: 78%; width: {{b.spB}}px; height: {{b.spB}}px\"><path style=\"fill: var(--strong)\" d=\"{{mark}}\"></path></svg>\n<div style=\"position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: {{b.gap}}px\">\n<svg width=\"{{b.markPx}}\" height=\"{{b.markPx}}\" viewBox=\"0 0 100 100\" aria-hidden=\"true\" style=\"position: static\"><path style=\"fill: var(--deepink)\" d=\"{{mark}}\"></path></svg>\n<span style=\"font-family: 'Pixelify Sans', monospace; font-weight: 700; font-size: {{b.wordFs}}px; line-height: 1; letter-spacing: 0.14em; margin-right: -0.14em; color: var(--deepink); text-shadow: 0 {{b.ts}}px 0 rgba(255,255,255,0.55)\">GLINT</span>\n<span style=\"font-size: {{b.capFs}}px; line-height: 1; letter-spacing: 0.18em; text-transform: uppercase; color: var(--deepink)\">Screenless band</span>\n</div>\n<div style=\"position: absolute; right: 6%; bottom: 7%; transform: rotate(-4deg); padding: {{b.stPadY}}px {{b.stPadX}}px; background: #fffaf2; border-radius: 999px; border: {{labelEdge}}; box-shadow: {{b.stShadow}}; font-size: {{b.capFs}}px; line-height: 1; letter-spacing: 0.14em; text-transform: uppercase; color: #29252c; white-space: nowrap\">20 mm \u00b7 {{wayName}}</div>\n</div>\n\n<div class=\"face\" style=\"width: {{b.W}}px; height: {{b.H}}px; left: {{b.nW2}}px; top: {{b.nH2}}px; transform: translateZ({{b.D2}}px); border: {{edge}}; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25)\">\n<svg width=\"{{b.W}}\" height=\"{{b.H}}\" viewBox=\"0 0 {{b.W}} {{b.H}}\" aria-hidden=\"true\"><path class=\"pat\" d=\"{{b.patF}}\"></path></svg>\n</div>\n<div class=\"face\" style=\"width: {{b.W}}px; height: {{b.H}}px; left: {{b.nW2}}px; top: {{b.nH2}}px; transform: rotateY(180deg) translateZ({{b.D2}}px); border: {{edge}}\">\n<svg width=\"{{b.W}}\" height=\"{{b.H}}\" viewBox=\"0 0 {{b.W}} {{b.H}}\" aria-hidden=\"true\"><path class=\"pat\" d=\"{{b.patF}}\"></path></svg>\n<div style=\"position: absolute; inset: 0; background: rgba(41,37,44,0.14)\"></div>\n</div>\n<div class=\"face\" style=\"width: {{b.W}}px; height: {{b.D}}px; left: {{b.nW2}}px; top: {{b.nD2}}px; transform: rotateX(-90deg) translateZ({{b.H2}}px); border: {{edge}}\">\n<div style=\"position: absolute; inset: 0; background: rgba(41,37,44,0.25)\"></div>\n</div>\n\n</div>\n</div>\n</div>\n\n<div style=\"position: absolute; left: -150px; width: 300px; top: {{b.labelTop}}px; display: {{b.labelDisplay}}; text-align: center; font-size: 13px; line-height: 18px; letter-spacing: 0.08em; text-transform: uppercase; color: #29252c\">{{b.label}}</div>\n</div>\n</sc-for>\n</div>\n\n<div class=\"float1\" aria-hidden=\"true\" style=\"position: absolute; left: {{s1x}}px; top: 250px; display: {{floatDisplay}}\"><svg width=\"44\" height=\"44\" viewBox=\"0 0 100 100\"><path d=\"{{mark}}\" style=\"fill: var(--strong)\"></path></svg></div>\n<div class=\"float2\" aria-hidden=\"true\" style=\"position: absolute; left: {{s2x}}px; top: 210px; display: {{floatDisplay}}\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 100 100\"><path d=\"{{mark}}\" style=\"fill: #fffaf2\"></path></svg></div>\n<div class=\"float3\" aria-hidden=\"true\" style=\"position: absolute; left: {{s3x}}px; top: 560px; display: {{floatDisplay}}\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 100 100\"><path d=\"{{mark}}\" style=\"fill: var(--strong)\"></path></svg></div>\n\n<div style=\"position: absolute; left: 48px; right: 48px; bottom: 32px; display: flex; flex-direction: column; gap: 12px\">\n<div style=\"display: flex; align-items: center; gap: 8px; flex-wrap: wrap\">\n<span style=\"width: 84px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5f5862\">View</span>\n<sc-for list=\"{{views}}\" as=\"o\" hint-placeholder-count=\"2\">\n<button class=\"chip\" type=\"button\" aria-pressed=\"{{o.selected}}\" data-pick=\"{{o.__key}}\" style=\"height: 30px; padding: 0 12px; border: 2px solid #29252c; border-radius: 999px; font: inherit; font-size: 13px; color: #29252c; background: {{o.bg}}; box-shadow: 2px 2px 0 0 #29252c\">{{o.name}}</button>\n</sc-for>\n<span style=\"width: 28px\"></span>\n<span style=\"font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5f5862\">Tray</span>\n<sc-for list=\"{{slides}}\" as=\"o\" hint-placeholder-count=\"3\">\n<button class=\"chip\" type=\"button\" aria-pressed=\"{{o.selected}}\" data-pick=\"{{o.__key}}\" style=\"height: 30px; padding: 0 12px; border: 2px solid #29252c; border-radius: 999px; font: inherit; font-size: 13px; color: #29252c; background: {{o.bg}}; box-shadow: 2px 2px 0 0 #29252c\">{{o.name}}</button>\n</sc-for>\n</div>\n<div style=\"display: flex; align-items: flex-start; gap: 8px\">\n<span style=\"width: 84px; flex: none; padding-top: 7px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5f5862\">Side accent</span>\n<div style=\"display: flex; align-items: center; gap: 8px; flex-wrap: wrap; row-gap: 10px\">\n<sc-for list=\"{{pats}}\" as=\"o\" hint-placeholder-count=\"11\">\n<button class=\"chip\" type=\"button\" aria-pressed=\"{{o.selected}}\" data-pick=\"{{o.__key}}\" style=\"height: 30px; padding: 0 12px; border: 2px solid #29252c; border-radius: 999px; font: inherit; font-size: 13px; color: #29252c; background: {{o.bg}}; box-shadow: 2px 2px 0 0 #29252c\">{{o.name}}</button>\n</sc-for>\n</div>\n</div>\n<div style=\"display: flex; align-items: center; gap: 8px; flex-wrap: wrap\">\n<span style=\"width: 84px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5f5862\">Size</span>\n<sc-for list=\"{{sizes}}\" as=\"o\" hint-placeholder-count=\"4\">\n<button class=\"chip\" type=\"button\" aria-pressed=\"{{o.selected}}\" data-pick=\"{{o.__key}}\" style=\"height: 30px; padding: 0 12px; border: 2px solid #29252c; border-radius: 999px; font: inherit; font-size: 13px; color: #29252c; background: {{o.bg}}; box-shadow: 2px 2px 0 0 #29252c\">{{o.name}}</button>\n</sc-for>\n</div>\n<div style=\"display: flex; align-items: center; gap: 8px; flex-wrap: wrap\">\n<span style=\"width: 84px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: #5f5862\">Colorway</span>\n<sc-for list=\"{{ways}}\" as=\"o\" hint-placeholder-count=\"5\">\n<button class=\"chip\" type=\"button\" aria-pressed=\"{{o.selected}}\" data-pick=\"{{o.__key}}\" style=\"display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px 0 8px; border: 2px solid #29252c; border-radius: 999px; font: inherit; font-size: 13px; color: #29252c; background: {{o.bg}}; box-shadow: 2px 2px 0 0 #29252c\"><span style=\"width: 12px; height: 12px; border: 2px solid #29252c; border-radius: 999px; background: {{o.dot}}\"></span>{{o.name}}</button>\n</sc-for>\n</div>\n</div>\n</div>\n";
+var PROPS={"hue": 300, "width": 110, "depth": 110, "height": 60, "look": "soft"};
+var comp=new Component(PROPS);
+function get(o,p){return p.split('.').reduce(function(a,k){return a==null?a:a[k]},o)}
+var handlers={};
+window.__render=function(){
+  handlers={};var vals=comp.renderVals();
+  var html=TPL.replace(/<sc-for list="\{\{([\w.]+)\}\}" as="(\w+)"[^>]*>([\s\S]*?)<\/sc-for>/g,function(m,l,a,inner){
+    return (get(vals,l)||[]).map(function(it,i){
+      var key=l+':'+i; if(it.pick)handlers[key]=it.pick;
+      var o=Object.assign({},it,{__key:key});
+      return inner.replace(/\{\{(\w+)\.([\w.]+)\}\}/g,function(mm,n,p){return n===a?String(get(o,p)):mm});
+    }).join('')});
+  html=html.replace(/\{\{([\w.]+)\}\}/g,function(m,p){var v=get(vals,p);return typeof v==='function'||v==null?'':String(v)});
+  document.getElementById('wrap').innerHTML=html;
+  var d=vals; comp.__vals=vals;
+  document.querySelectorAll('[data-pick]').forEach(function(b){b.addEventListener('click',function(){handlers[b.dataset.pick]()})});
+  var st=document.querySelector('[data-stage]');
+  if(st){st.addEventListener('pointerdown',function(e){comp.drag={x:e.clientX,y:e.clientY,rx:comp.state.rx,ry:comp.state.ry};st.setPointerCapture(e.pointerId)});
+    st.addEventListener('pointermove',function(e){var g=comp.drag;if(!g)return;var s=window.__scale||1;comp.state.ry=g.ry+(e.clientX-g.x)/s*0.4;comp.state.rx=Math.max(-70,Math.min(10,g.rx-(e.clientY-g.y)/s*0.3));
+      document.querySelectorAll('[data-rot]').forEach(function(el){el.style.transform='rotateX('+comp.state.rx+'deg) rotateY('+comp.state.ry+'deg)'})});
+    function up(){comp.drag=null};st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);}
+};
+function fit(){var s=Math.min(1,window.innerWidth/1360);window.__scale=s;var w=document.getElementById('wrap');w.style.transform='scale('+s+')';document.body.style.height=(1000*s)+'px'}
+window.addEventListener('resize',fit);
+window.glintBox={set:function(s){Object.assign(comp.state,s);window.__render()},mm:function(m){comp.state.size=m;window.__render()}};
+window.__render();fit();
+</script></body></html>

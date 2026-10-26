@@ -7,8 +7,12 @@ import {
 
 export function proxy(request: NextRequest) {
   const nonce = crypto.randomUUID();
+  const isProduction = process.env.NODE_ENV === "production";
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy(nonce));
+  requestHeaders.set(
+    "Content-Security-Policy",
+    contentSecurityPolicy(nonce, { inlineStyles: !isProduction }),
+  );
 
   const response = NextResponse.next({
     request: { headers: requestHeaders },
@@ -16,7 +20,7 @@ export function proxy(request: NextRequest) {
 
   applySecurityHeaders(response.headers, {
     nonce,
-    isProduction: process.env.NODE_ENV === "production",
+    isProduction,
   });
 
   return response;

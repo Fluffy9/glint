@@ -736,6 +736,109 @@
   color: var(--ink-muted);
 }
 
+.compare-band {
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-6);
+  padding: var(--space-8) var(--space-6);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-1);
+  --gl-warp-cell: var(--accent-soft);
+  --gl-warp-ground: var(--bg);
+  --gl-warp-star: var(--bg);
+}
+
+.compare-band-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Keep the warp at its painted pixel size so resize only crops, never remaps. */
+.compare-band-field .gl-warp {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+}
+
+.compare-band-copy,
+.compare-picker {
+  position: relative;
+  z-index: 1;
+}
+
+.compare-band-copy {
+  max-width: 40rem;
+  margin-bottom: var(--space-6);
+}
+
+.compare-band-copy .section-lede {
+  margin-bottom: 0;
+}
+
+.compare-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+  margin-bottom: var(--space-4);
+  overflow: visible;
+}
+
+.compare-tabs .gl-tab {
+  text-decoration: none;
+}
+
+.compare-panels {
+  display: grid;
+}
+
+.compare-panels > * {
+  grid-area: 1 / 1;
+}
+
+.compare-panel-idle {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.compare-card-title {
+  margin: 0;
+  padding: var(--space-4) var(--space-4) 0;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+}
+
+.compare-card-note {
+  padding: var(--space-4);
+  border-top: var(--stroke-2) solid var(--line);
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.compare-card-note p {
+  margin: 0;
+}
+
+.compare-card-note p + p {
+  margin-top: var(--space-2);
+}
+
+.compare-page {
+  max-width: 48rem;
+}
+
+.compare-band-card {
+  position: relative;
+  z-index: 1;
+}
+
 .compare-body {
   padding: 0;
   overflow-x: auto;
@@ -793,13 +896,8 @@
 }
 
 @media (max-width: 640px) {
-  .compare-table thead th:first-child,
-  .compare-table tbody th {
-    display: none;
-  }
-
   .compare-table td {
-    min-width: 10rem;
+    min-width: 9rem;
   }
 }
 

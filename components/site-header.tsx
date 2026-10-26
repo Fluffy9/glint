@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ColorwaySwitch } from "./colorway-switch";
+import { ModeToggle } from "./mode-toggle";
 import { SparkleMark } from "./sparkle-mark";
 
 export function SiteHeader() {
@@ -14,7 +14,7 @@ export function SiteHeader() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/security">Security</Link>
         </nav>
-        <ColorwaySwitch />
+        <ModeToggle />
       </div>
     </header>
   );

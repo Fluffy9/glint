@@ -7,7 +7,7 @@
 .site-nav,
 .site-nav-rest,
 .site-links,
-.colorways,
+.band-swatches,
 .promise-grid,
 .stat-grid,
 .price-grid,
@@ -207,4 +207,47 @@ a.gl-btn {
   align-items: flex-start;
   gap: var(--space-4);
   margin-top: var(--space-4);
+}
+
+.band-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 28rem;
+}
+
+.band-picker-note {
+  margin: 0;
+}
+
+.band-swatch {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--elev-1);
+  cursor: pointer;
+}
+
+.band-swatch.is-selected {
+  outline: var(--stroke-3) solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: var(--elev-2);
+}
+
+.band-swatch[data-band="lavender"] {
+  background: oklch(0.82 0.09 300);
+}
+
+.band-swatch[data-band="mint"] {
+  background: oklch(0.82 0.09 160);
+}
+
+.band-swatch[data-band="peach"] {
+  background: oklch(0.82 0.09 55);
+}
+
+.band-swatch[data-band="sky"] {
+  background: oklch(0.82 0.09 235);
 }

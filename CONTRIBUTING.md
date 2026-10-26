@@ -4,6 +4,6 @@
 
 Commit messages follow Conventional Commits: `feat`, `fix`, `docs`, `chore`, `test`. One concern per commit.
 
-The pre-commit hook typechecks and runs `pnpm test`. Do not skip it.
+The pre-commit hook typechecks and runs `pnpm test`. Do not skip it. Run `pnpm test:db` before merging a migration.
 
 Secrets stay in `.env`. Commit `.env.example` with names only. Do not commit `*.zip`.

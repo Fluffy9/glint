@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { appReady } from "./ready";
+import { appReady, boxOf } from "./ready";
 
 const groups = [
   {
@@ -78,4 +78,15 @@ test("keeps the same footer groups on an inner page", async ({ page }) => {
     "href",
     "/",
   );
+});
+
+test("keeps the maker credit under the footer links", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/");
+  await appReady(page);
+
+  const bar = footer(page);
+  const credit = await boxOf(bar.locator("> p"));
+  const nav = await boxOf(bar.locator("nav.site-footer-nav"));
+  expect(credit.y).toBeGreaterThan(nav.y + nav.height - 1);
 });

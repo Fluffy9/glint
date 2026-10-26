@@ -20,12 +20,14 @@ export function CompetitorTable({
       <div className="gl-win-bar">
         <span className="gl-win-title">{copy.compare.window}</span>
       </div>
+      {Title ? <Title className="compare-card-title">{fill(copy.compare.cardTitle, filled)}</Title> : null}
       <div className="gl-win-body compare-body">
-        {Title ? <Title className="compare-card-title">{fill(copy.compare.cardTitle, filled)}</Title> : null}
         <table className="compare-table">
           <thead>
             <tr>
-              <th scope="col"> </th>
+              <th scope="col">
+                <span className="gl-sr">Topic</span>
+              </th>
               <th scope="col">{fill(copy.compare.column, filled)}</th>
               <th scope="col">{competitor.name}</th>
             </tr>

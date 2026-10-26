@@ -1,13 +1,24 @@
 "use client";
 
-import { bandColors } from "@/lib/appearance";
+import { bandColors, type BandColor } from "@/lib/appearance";
 import { useAppearance } from "./appearance-provider";
 
-export function BandPicker() {
+type Props = {
+  onSelect?: (band: BandColor) => void;
+  busy?: boolean;
+};
+
+export function BandPicker({ onSelect, busy = false }: Props) {
   const { band, setBand } = useAppearance();
+  const choose = onSelect ?? setBand;
 
   return (
-    <div className="band-picker" role="group" aria-label="Band colour">
+    <div
+      className="band-picker"
+      role="group"
+      aria-label="Band colour"
+      aria-busy={busy || undefined}
+    >
       {bandColors.map((option) => (
         <button
           key={option.id}
@@ -17,7 +28,7 @@ export function BandPicker() {
           }
           data-band={option.id}
           aria-pressed={option.id === band}
-          onClick={() => setBand(option.id)}
+          onClick={() => choose(option.id)}
         >
           <span className="band-choice-dot" data-band={option.id} />
           {option.label}

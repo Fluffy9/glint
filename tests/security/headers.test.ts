@@ -26,6 +26,23 @@ describe("Browser headers", () => {
     const policy = contentSecurityPolicy("test-nonce");
     expect(policy).toContain("style-src-attr 'unsafe-inline'");
     expect(policy).toMatch(/style-src 'self' https:\/\/fonts\.googleapis\.com/);
+    expect(policy).not.toContain("style-src 'self' 'unsafe-inline'");
+  });
+
+  it("lets the dev indicator style itself, and closes that in production", () => {
+    const production = applySecurityHeaders(new Headers(), {
+      nonce: "n",
+      isProduction: true,
+    }).get("content-security-policy");
+    const development = applySecurityHeaders(new Headers(), {
+      nonce: "n",
+      isProduction: false,
+    }).get("content-security-policy");
+
+    expect(production).not.toContain("'unsafe-inline' https://fonts.googleapis.com");
+    expect(development).toContain(
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    );
   });
 
   it("sends nosniff, a strict referrer, and HSTS in production", () => {

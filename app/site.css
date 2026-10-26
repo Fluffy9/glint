@@ -1,3 +1,33 @@
+@property --gb-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: oklch(0.82 0.09 300);
+}
+
+@property --gb-deep {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: oklch(0.7 0.1 300);
+}
+
+@property --gb-hl {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: oklch(0.91 0.05 300);
+}
+
+@property --gb-strong {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: oklch(0.55 0.13 300);
+}
+
+@property --gb-deepink {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: oklch(0.36 0.1 300);
+}
+
 .site {
   max-width: 1080px;
   margin: 0 auto;
@@ -107,11 +137,35 @@
   --elev-1: 2px 2px 0 0 #29252c;
   --elev-2: 4px 4px 0 0 #29252c;
   --elev-3: 6px 6px 0 0 #29252c;
+  transition:
+    --gb-accent var(--dur-sheen) var(--ease-out),
+    --gb-deep var(--dur-sheen) var(--ease-out),
+    --gb-hl var(--dur-sheen) var(--ease-out),
+    --gb-strong var(--dur-sheen) var(--ease-out),
+    --gb-deepink var(--dur-sheen) var(--ease-out);
+}
+
+.home-hero-wash {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background: radial-gradient(
     ellipse 70% 60% at 50% 42%,
-    var(--gb-bg-hi, oklch(0.97 0.018 300)),
-    var(--gb-bg-lo, oklch(0.89 0.045 300))
+    var(--wash-hi, oklch(0.97 0.018 300)),
+    var(--wash-lo, oklch(0.89 0.045 300))
   );
+}
+
+.home-hero-wash.is-incoming {
+  clip-path: inset(0 100% 0 0);
+  animation: heroColorWipe var(--dur-sheen) var(--ease-out) forwards;
+}
+
+@keyframes heroColorWipe {
+  to {
+    clip-path: inset(0 0 0 0);
+  }
 }
 
 .home-hero-nav {
@@ -132,6 +186,7 @@
 .home-hero-stage {
   position: absolute;
   inset: 0;
+  z-index: 1;
   cursor: grab;
   touch-action: none;
   transform-style: preserve-3d;
@@ -202,7 +257,6 @@
   flex-wrap: wrap;
   gap: var(--space-4);
   align-items: center;
-  margin-bottom: var(--space-4);
 }
 
 .price-note {
@@ -212,6 +266,34 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #29252c;
+}
+
+.home-hero-dev-toggle {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  height: 36px;
+  padding: 0 12px;
+  border: var(--stroke-2) solid #29252c;
+  border-radius: var(--radius-1);
+  background: #fffaf2;
+  color: #29252c;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 0 0 #29252c;
+  cursor: pointer;
+}
+
+.home-hero-dev-toggle[aria-pressed="true"] {
+  background: var(--gb-accent, var(--accent));
+}
+
+.home-hero-dev-toggle:focus-visible {
+  outline: var(--stroke-3) solid #29252c;
+  outline-offset: 2px;
 }
 
 .home-hero-dev {
@@ -598,6 +680,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .home-hero {
+    transition: none;
+  }
+
+  .home-hero-wash.is-incoming {
+    animation: none;
+    clip-path: none;
+  }
+
   .gb-sway,
   .gb-float-1,
   .gb-float-2,
@@ -798,6 +889,7 @@ a.gl-btn {
 .band-picker {
   display: inline-flex;
   max-width: 100%;
+  margin-bottom: var(--space-4);
   border: var(--stroke-2) solid #29252c;
   border-radius: var(--radius-1);
   background: #fffaf2;

@@ -6,6 +6,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type AnimationEvent as ReactAnimationEvent,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from "react";
@@ -14,6 +15,7 @@ import { PackagingDev } from "@/components/glint-box/packaging-dev";
 import { SlideBox } from "@/components/glint-box/slide-box";
 import { SiteLinks } from "@/components/site-links";
 import { useAppearance } from "@/components/appearance-provider";
+import type { BandColor } from "@/lib/appearance";
 import {
   BAND_HUE,
   BAND_LABEL,
@@ -29,16 +31,49 @@ type Props = {
   priceNote: string;
 };
 
+type Wipe = { from: BandColor; to: BandColor };
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function washStyle(band: BandColor): CSSProperties {
+  const colors = colorwayVars(BAND_HUE[band]);
+  return {
+    "--wash-hi": colors.bgHi,
+    "--wash-lo": colors.bgLo,
+  } as CSSProperties;
+}
+
+function boxPaint(band: BandColor): CSSProperties {
+  const colors = colorwayVars(BAND_HUE[band]);
+  return {
+    "--gb-accent": colors.accent,
+    "--gb-deep": colors.deep,
+    "--gb-hl": colors.hl,
+    "--gb-strong": colors.strong,
+    "--gb-deepink": colors.deepink,
+  } as CSSProperties;
+}
+
 export function HomeHero({ priceNote }: Props) {
-  const { band } = useAppearance();
-  const hue = BAND_HUE[band];
-  const colors = colorwayVars(hue);
+  const { band, setBand } = useAppearance();
+  const [wipe, setWipe] = useState<Wipe | null>(null);
+  const wipeRef = useRef<Wipe | null>(null);
+  const pendingRef = useRef<BandColor | null>(null);
+  const bandRef = useRef(band);
+  bandRef.current = band;
+  wipeRef.current = wipe;
+
+  const paintBand = wipe?.to ?? band;
+  const colors = colorwayVars(BAND_HUE[paintBand]);
 
   const [rx, setRx] = useState(-24);
   const [ry, setRy] = useState(-36);
   const [slide, setSlide] = useState(0);
   const [pat, setPat] = useState<PatternId>("warpSpark");
   const [mm, setMm] = useState<BoxMm>([110, 110, 60]);
+  const [devOpen, setDevOpen] = useState(false);
   const drag = useRef<{ x: number; y: number; rx: number; ry: number } | null>(
     null,
   );
@@ -67,18 +102,66 @@ export function HomeHero({ priceNote }: Props) {
     drag.current = null;
   }, []);
 
-  const theme = {
-    "--gb-accent": colors.accent,
-    "--gb-deep": colors.deep,
-    "--gb-hl": colors.hl,
-    "--gb-strong": colors.strong,
-    "--gb-deepink": colors.deepink,
-    "--gb-bg-hi": colors.bgHi,
-    "--gb-bg-lo": colors.bgLo,
-  } as CSSProperties;
+  const chooseBand = useCallback(
+    (next: BandColor) => {
+      const active = wipeRef.current;
+      const showing = active?.to ?? bandRef.current;
+      if (next === showing) {
+        pendingRef.current = null;
+        return;
+      }
+      if (prefersReducedMotion()) {
+        pendingRef.current = null;
+        wipeRef.current = null;
+        setWipe(null);
+        setBand(next);
+        return;
+      }
+      if (active) {
+        pendingRef.current = next;
+        return;
+      }
+      const started = { from: bandRef.current, to: next };
+      wipeRef.current = started;
+      setWipe(started);
+    },
+    [setBand],
+  );
+
+  const finishWipe = useCallback(
+    (event: ReactAnimationEvent<HTMLDivElement>) => {
+      if (event.target !== event.currentTarget) return;
+      if (!event.animationName.includes("heroColorWipe")) return;
+      const current = wipeRef.current;
+      if (!current) return;
+      const queued = pendingRef.current;
+      pendingRef.current = null;
+      setBand(current.to);
+      if (queued && queued !== current.to) {
+        const follow = { from: current.to, to: queued };
+        wipeRef.current = follow;
+        setWipe(follow);
+      } else {
+        wipeRef.current = null;
+        setWipe(null);
+      }
+    },
+    [setBand],
+  );
 
   return (
-    <section className="home-hero" style={theme} aria-label="Glint">
+    <section className="home-hero" style={boxPaint(paintBand)} aria-label="Glint">
+      <div className="home-hero-wash" style={washStyle(wipe?.from ?? band)} aria-hidden />
+      {wipe ? (
+        <div
+          key={`${wipe.from}-${wipe.to}`}
+          className="home-hero-wash is-incoming"
+          style={washStyle(wipe.to)}
+          onAnimationEnd={finishWipe}
+          aria-hidden
+        />
+      ) : null}
+
       <header className="home-hero-nav">
         <SiteLinks />
       </header>
@@ -90,13 +173,13 @@ export function HomeHero({ priceNote }: Props) {
           You wear it. Heart rate, sleep, and movement stay on the phone until
           you decide a copy should leave.
         </p>
+        <BandPicker onSelect={chooseBand} busy={wipe !== null} />
         <div className="hero-actions">
           <Link className="gl-btn gl-btn-primary" href="/pricing">
             [ Get the band ]
           </Link>
           <p className="price-note">{priceNote}</p>
         </div>
-        <BandPicker />
       </div>
 
       <div
@@ -116,6 +199,16 @@ export function HomeHero({ priceNote }: Props) {
       </div>
 
       {isDev ? (
+        <button
+          type="button"
+          className="home-hero-dev-toggle"
+          aria-pressed={devOpen}
+          onClick={() => setDevOpen((open) => !open)}
+        >
+          Dev
+        </button>
+      ) : null}
+      {isDev && devOpen ? (
         <PackagingDev
           slide={slide}
           pat={pat}

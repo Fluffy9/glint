@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ModeToggle } from "./mode-toggle";
+import { SiteLinks } from "./site-links";
 import { SparkleMark } from "./sparkle-mark";
 
 export function SiteHeader() {
@@ -9,13 +9,7 @@ export function SiteHeader() {
         <SparkleMark />
         Glint
       </Link>
-      <div className="site-nav-rest">
-        <nav className="site-links" aria-label="Site">
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/security">Security</Link>
-        </nav>
-        <ModeToggle />
-      </div>
+      <SiteLinks />
     </header>
   );
 }

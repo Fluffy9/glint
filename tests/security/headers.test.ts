@@ -22,6 +22,12 @@ describe("Browser headers", () => {
     expect(scriptSrc).toContain("'nonce-test-nonce'");
   });
 
+  it("allows React style attributes without opening style elements", () => {
+    const policy = contentSecurityPolicy("test-nonce");
+    expect(policy).toContain("style-src-attr 'unsafe-inline'");
+    expect(policy).toMatch(/style-src 'self' https:\/\/fonts\.googleapis\.com/);
+  });
+
   it("sends nosniff, a strict referrer, and HSTS in production", () => {
     const production = applySecurityHeaders(new Headers(), {
       nonce: "n",

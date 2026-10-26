@@ -41,16 +41,16 @@ export function CompareSection() {
   return (
     <section className="section" aria-labelledby="compare">
       <h2 id="compare" className="h2">
-        Fitness tracking that just works
+        Glint vs the usual stack
       </h2>
       <p className="section-lede">
-        Against Whoop, Fitbit, and the rest: you buy the band once, keep the
-        data, and skip the subscription theatre.
+        Against Whoop, Fitbit, and the rest: the same record, without the
+        subscription theatre.
       </p>
 
       <div className="gl-win">
         <div className="gl-win-bar">
-          <span className="gl-win-title">Glint vs the usual stack</span>
+          <span className="gl-win-title">Side by side</span>
         </div>
         <div className="gl-win-body compare-body">
           <table className="compare-table">

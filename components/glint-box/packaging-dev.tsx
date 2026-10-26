@@ -8,21 +8,12 @@ type Props = {
   slide: number;
   pat: PatternId;
   mm: BoxMm;
-  accent: string;
   onSlide: (slide: number) => void;
   onPat: (pat: PatternId) => void;
   onMm: (mm: BoxMm) => void;
 };
 
-export function PackagingDev({
-  slide,
-  pat,
-  mm,
-  accent,
-  onSlide,
-  onPat,
-  onMm,
-}: Props) {
+export function PackagingDev({ slide, pat, mm, onSlide, onPat, onMm }: Props) {
   return (
     <div className="home-hero-dev" aria-label="Packaging controls">
       <DevRow label="Tray">
@@ -33,24 +24,14 @@ export function PackagingDev({
             [1, "Open"],
           ] as const
         ).map(([value, name]) => (
-          <DevChip
-            key={name}
-            selected={slide === value}
-            accent={accent}
-            onClick={() => onSlide(value)}
-          >
+          <DevChip key={name} selected={slide === value} onClick={() => onSlide(value)}>
             {name}
           </DevChip>
         ))}
       </DevRow>
       <DevRow label="Side accent">
         {PATTERN_IDS.map((id) => (
-          <DevChip
-            key={id}
-            selected={pat === id}
-            accent={accent}
-            onClick={() => onPat(id)}
-          >
+          <DevChip key={id} selected={pat === id} onClick={() => onPat(id)}>
             {PATTERN_LABELS[id]}
           </DevChip>
         ))}
@@ -62,7 +43,6 @@ export function PackagingDev({
             selected={
               size.mm[0] === mm[0] && size.mm[1] === mm[1] && size.mm[2] === mm[2]
             }
-            accent={accent}
             onClick={() => onMm(size.mm)}
           >
             {size.name}
@@ -85,12 +65,10 @@ function DevRow({ label, children }: { label: string; children: ReactNode }) {
 function DevChip({
   selected,
   onClick,
-  accent,
   children,
 }: {
   selected: boolean;
   onClick: () => void;
-  accent: string;
   children: ReactNode;
 }) {
   return (
@@ -99,7 +77,6 @@ function DevChip({
       className="home-hero-dev-chip"
       aria-pressed={selected}
       onClick={onClick}
-      style={{ background: selected ? accent : "#fffaf2" }}
     >
       {children}
     </button>

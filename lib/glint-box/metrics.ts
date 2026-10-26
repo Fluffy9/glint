@@ -173,6 +173,8 @@ export function colorwayVars(hue: number) {
     deepink: `oklch(0.36 0.1 ${hue})`,
     bgHi: `oklch(0.97 0.018 ${hue})`,
     bgLo: `oklch(0.89 0.045 ${hue})`,
+    bgHiDark: `oklch(0.36 0.045 ${hue})`,
+    bgLoDark: `oklch(0.24 0.035 ${hue})`,
   };
 }
 

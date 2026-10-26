@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getStripe, siteUrl } from "@/lib/stripe";
 
-export const runtime = "nodejs";
-
 export async function POST(request: Request) {
   let body: unknown;
   try {

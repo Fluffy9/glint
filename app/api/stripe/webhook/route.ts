@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { handleStripeEvent } from "@/lib/handle-stripe-event";
 import { getStripe } from "@/lib/stripe";
 
-export const runtime = "nodejs";
-
 export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
   const secret = process.env.STRIPE_WEBHOOK_SECRET;

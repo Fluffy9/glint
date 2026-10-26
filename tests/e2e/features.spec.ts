@@ -4,12 +4,12 @@ import { appReady } from "./ready";
 const features = [
   ["No BS", "Plain language about what the band stores"],
   ["No screen", "Nothing on your wrist to check mid-run"],
-  ["Works offline", "Tracking stays on the phone"],
-  ["Long battery", "Days of wear between charges"],
-  ["Encrypted data", "Optional backup is scrambled"],
+  ["Local first", "lives on your phone"],
+  ["Battery", "No screen to power"],
+  ["Encrypted backup", "ciphertext only"],
   ["Never sold", "not a product, a feed, or an ad target"],
   ["Export anytime", "Google Drive"],
-  ["Delete anytime", "Delete the account and so are we"],
+  ["Delete anytime", "Delete the account"],
 ] as const;
 
 test("shows every feature card under fitness tracking", async ({ page }) => {
@@ -24,7 +24,9 @@ test("shows every feature card under fitness tracking", async ({ page }) => {
   await expect(section.getByRole("link")).toHaveCount(0);
 
   for (const [title, snippet] of features) {
-    const card = section.locator(".feature-card:visible", { hasText: title });
+    const card = section.locator(".feature-card:visible", {
+      has: page.locator(".feature-card-title", { hasText: new RegExp(`^${title}$`) }),
+    });
     await expect(card.locator("svg.feature-icon")).toBeVisible();
     await expect(card).toContainText(snippet);
   }

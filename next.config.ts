@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const githubPages = process.env.GITHUB_PAGES === "1";
 
 const nextConfig: NextConfig = {
+  // Dev assets are tied to localhost. 127.0.0.1 is a different origin.
+  allowedDevOrigins: ["127.0.0.1"],
   ...(githubPages
     ? {
         output: "export",

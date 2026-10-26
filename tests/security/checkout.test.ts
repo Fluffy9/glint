@@ -1,18 +1,29 @@
+import type Stripe from "stripe";
 import { describe, expect, it } from "vitest";
-import { parseCheckoutSelection } from "../../lib/checkout-selection";
+import { paidSessionFromCheckout } from "../../functions/src/domain/webhook";
 
-describe("Checkout allowlist", () => {
-  it("accepts the band, or the band plus backup", () => {
-    expect(parseCheckoutSelection({ backup: false })).toEqual({ backup: false });
-    expect(parseCheckoutSelection({ backup: true })).toEqual({ backup: true });
-  });
+const paidAt = new Date("2026-01-01T00:00:00.000Z");
 
-  it("rejects any other shape", () => {
-    expect(parseCheckoutSelection(null)).toBeNull();
-    expect(parseCheckoutSelection([])).toBeNull();
-    expect(parseCheckoutSelection({ backup: "true" })).toBeNull();
-    expect(parseCheckoutSelection({ band: true })).toBeNull();
-    expect(parseCheckoutSelection({ backup: true, price: "price_evil" })).toBeNull();
-    expect(parseCheckoutSelection({ backup: true, email: "a@example.com" })).toBeNull();
+function session(metadata: Stripe.Metadata): Stripe.Checkout.Session {
+  return {
+    id: "cs_1",
+    object: "checkout.session",
+    customer: "cus_1",
+    customer_details: { email: "a@b.co" },
+    amount_total: 6999,
+    payment_status: "paid",
+    metadata,
+  } as Stripe.Checkout.Session;
+}
+
+describe("Payment link metadata", () => {
+  it("turns backup on only when metadata says so", () => {
+    expect(paidSessionFromCheckout(session({ band: "true", backup: "true" }), paidAt).backup).toBe(true);
+    expect(paidSessionFromCheckout(session({ band: "true", backup: "false" }), paidAt).backup).toBe(false);
+    expect(paidSessionFromCheckout(session({ backup: "true", price: "price_evil" }), paidAt)).toMatchObject({
+      backup: true,
+      email: "a@b.co",
+      customerId: "cus_1",
+    });
   });
 });

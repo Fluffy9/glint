@@ -12,6 +12,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:db": "sh scripts/test-db.sh",
+    "emulators": "pnpm --dir functions build && ./functions/node_modules/.bin/firebase emulators:start --only auth,functions,firestore,storage",
+    "seed:purchase": "node scripts/seed-purchase.mjs",
     "prepare": "husky"
   },
   "dependencies": {

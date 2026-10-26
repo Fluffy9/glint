@@ -17,6 +17,9 @@ export default function LoginPage() {
         <h1 className="h1">{copy.login.title}</h1>
         <p>{copy.login.body}</p>
         <p>
+          <Link href="/account">{copy.account.title}</Link>
+        </p>
+        <p>
           <Link href="/pricing">{copy.login.pricing}</Link>
         </p>
       </article>

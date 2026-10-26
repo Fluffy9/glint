@@ -1,12 +1,18 @@
 const HSTS = "max-age=63072000; includeSubDomains";
 
+const emulatorConnect =
+  "http://127.0.0.1:9099 http://127.0.0.1:5001 http://127.0.0.1:8180 http://127.0.0.1:9199";
+
 export function contentSecurityPolicy(
   nonce: string,
-  options?: { inlineStyles?: boolean },
+  options?: { inlineStyles?: boolean; emulators?: boolean },
 ): string {
   const styleSrc = options?.inlineStyles
     ? "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com"
     : "style-src 'self' https://fonts.googleapis.com";
+  const connectSrc = options?.emulators
+    ? `connect-src 'self' ${emulatorConnect} https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://*.cloudfunctions.net`
+    : "connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com https://*.cloudfunctions.net";
 
   return [
     "default-src 'self'",
@@ -16,7 +22,7 @@ export function contentSecurityPolicy(
     "style-src-attr 'unsafe-inline'",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data:",
-    "connect-src 'self'",
+    connectSrc,
     "form-action 'self' https://checkout.stripe.com https://billing.stripe.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
@@ -33,6 +39,7 @@ export function applySecurityHeaders(
     contentSecurityPolicy(options.nonce, {
       // The Next.js dev indicator injects style elements. Production stays closed.
       inlineStyles: !options.isProduction,
+      emulators: !options.isProduction,
     }),
   );
   headers.set("X-Content-Type-Options", "nosniff");

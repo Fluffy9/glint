@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function paid(uid) {
+      return request.auth != null
+        && request.auth.uid == uid
+        && exists(/databases/$(database)/documents/entitlements/$(uid))
+        && get(/databases/$(database)/documents/entitlements/$(uid)).data.paidUntil > request.time;
+    }
+
+    match /orders/{id} {
+      allow read, write: if false;
+    }
+
+    match /pendingEntitlements/{email} {
+      allow read, write: if false;
+    }
+
+    match /entitlements/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /users/{uid}/objects/{objectId} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if paid(uid);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+    }
+  }
+}

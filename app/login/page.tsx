@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { copy, fill, pageTitle } from "@/content";
 
 export const metadata: Metadata = {
-  title: "Sign in · Glint",
-  description: "Sign in to a Glint account.",
+  title: pageTitle(copy.login.title),
+  description: fill(copy.login.description),
 };
 
 export default function LoginPage() {
@@ -13,13 +14,10 @@ export default function LoginPage() {
     <div className="site">
       <SiteHeader />
       <article className="prose">
-        <h1 className="h1">Sign in</h1>
+        <h1 className="h1">{copy.login.title}</h1>
+        <p>{copy.login.body}</p>
         <p>
-          An account is where a backup lives after you choose to send a copy off
-          the phone. Sign-in is not open on this site yet.
-        </p>
-        <p>
-          <Link href="/pricing">See pricing</Link>
+          <Link href="/pricing">{copy.login.pricing}</Link>
         </p>
       </article>
       <SiteFooter />

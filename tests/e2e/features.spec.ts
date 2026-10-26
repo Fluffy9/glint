@@ -8,7 +8,7 @@ const features = [
   ["Long battery", "Days of wear between charges"],
   ["Encrypted data", "Optional backup is scrambled"],
   ["Never sold", "not a product, a feed, or an ad target"],
-  ["Export anytime", "CSV or JSON"],
+  ["Export anytime", "Google Drive"],
   ["Delete anytime", "Delete the account and so are we"],
 ] as const;
 

@@ -88,6 +88,24 @@ test("keeps one comparison size and names once versus yearly", async ({ page }) 
   }
 });
 
+test("scrolls the comparison table when the window is narrow", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await page.goto("/");
+  await appReady(page);
+
+  const panel = shown(page);
+  const body = panel.locator(".compare-body");
+  await expect(panel.locator(".compare-card-title")).toBeVisible();
+  await expect
+    .poll(async () =>
+      body.evaluate((el) => ({
+        scroll: el.scrollWidth > el.clientWidth + 1,
+        titleOutside: !el.querySelector(".compare-card-title"),
+      })),
+    )
+    .toEqual({ scroll: true, titleOutside: true });
+});
+
 test("keeps the comparison pattern the same size when the window changes", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");

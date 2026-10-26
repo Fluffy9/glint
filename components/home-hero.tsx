@@ -9,6 +9,8 @@ import { PackagingDev } from "@/components/glint-box/packaging-dev";
 import { SlideBox } from "@/components/glint-box/slide-box";
 import { SiteLinks } from "@/components/site-links";
 import { useBoxDrag } from "@/components/use-box-drag";
+import { copy } from "@/content";
+import { site } from "@/content/site";
 import { BAND_LABEL, boxMetrics, type BoxMm } from "@/lib/glint-box/metrics";
 import { MARK_PATH, type PatternId } from "@/lib/glint-box/patterns";
 
@@ -33,7 +35,7 @@ export function HomeHero({ priceNote }: Props) {
   );
 
   return (
-    <section className="home-hero" style={boxPaint(paintBand)} aria-label="Glint">
+    <section className="home-hero" style={boxPaint(paintBand)} aria-label={site.name}>
       <div className="home-hero-wash" style={washStyle(wipe?.from ?? band, mode)} aria-hidden />
       {wipe ? (
         <div
@@ -50,16 +52,13 @@ export function HomeHero({ priceNote }: Props) {
       </header>
 
       <div className="home-hero-copy">
-        <p className="home-hero-brand">Glint</p>
-        <h1 className="home-hero-title">A band with no screen.</h1>
-        <p className="home-hero-lede">
-          You wear it. Heart rate, sleep, and movement stay on the phone until
-          you decide a copy should leave.
-        </p>
+        <p className="home-hero-brand">{site.name}</p>
+        <h1 className="home-hero-title">{copy.hero.title}</h1>
+        <p className="home-hero-lede">{copy.hero.lede}</p>
         <BandPicker onSelect={chooseBand} busy={wipe !== null} />
         <div className="hero-actions">
           <Link className="gl-btn gl-btn-primary" href="/pricing">
-            [ Get the band ]
+            {copy.nav.getTheBand}
           </Link>
           <p className="price-note">{priceNote}</p>
         </div>
@@ -71,7 +70,7 @@ export function HomeHero({ priceNote }: Props) {
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        aria-label="Packaging box, drag to turn"
+        aria-label={copy.nav.dragToTurn}
       >
         <div className="home-hero-box">
           <Sparkle className="gb-float gb-float-1" size={44} fill="var(--gb-strong)" />

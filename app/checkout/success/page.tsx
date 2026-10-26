@@ -2,31 +2,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { ManageBilling } from "@/components/manage-billing";
+import { CheckoutSession } from "@/components/checkout-session";
+import { copy, fill, pageTitle } from "@/content";
 
 export const metadata: Metadata = {
-  title: "Order received · Glint",
+  title: pageTitle(copy.checkout.successTitle),
 };
 
-export default async function CheckoutSuccess({
-  searchParams,
-}: {
-  searchParams: Promise<{ session_id?: string }>;
-}) {
-  const { session_id: sessionId } = await searchParams;
-
+export default function CheckoutSuccess() {
   return (
     <div className="site">
       <SiteHeader />
       <article className="prose">
-        <h1 className="h1">Order received</h1>
+        <h1 className="h1">{copy.checkout.successTitle}</h1>
+        <p>{copy.checkout.successBody}</p>
+        <CheckoutSession />
         <p>
-          Stripe has the payment. The band works without backup. If you added
-          backup, you can cancel it and the band still works.
-        </p>
-        {sessionId ? <ManageBilling sessionId={sessionId} /> : null}
-        <p>
-          <Link href="/">Back to Glint</Link>
+          <Link href="/">{fill(copy.checkout.back)}</Link>
         </p>
       </article>
       <SiteFooter />

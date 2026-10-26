@@ -36,17 +36,11 @@ test("centers the same links in the page header", async ({ page }) => {
   expect(markBox.x).toBeLessThan(linksBox.x);
 });
 
-test("centers the links on their own row when the header is narrow", async ({ page }) => {
+test("hides Pricing, Privacy, and Security when the header is narrow", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 });
   await open(page, "/");
-  const header = page.locator("header.home-hero-nav:visible");
-  const links = page.locator("nav.site-links:visible");
-  const { delta, linksBox, headerBox } = await offsetFromCenter(header, links);
-  expect(delta).toBeLessThan(12);
-
-  const signBox = await boxOf(page.locator("a.site-signin:visible"));
-  expect(signBox.y).toBeGreaterThan(linksBox.y);
-  expect(signBox.x + signBox.width).toBeLessThanOrEqual(headerBox.x + headerBox.width + 1);
+  await expect(page.locator("header.home-hero-nav:visible nav.site-links")).toBeHidden();
+  await expect(page.locator("a.site-signin:visible")).toBeVisible();
 });
 
 test("opens pricing, privacy, and security from the header", async ({ page }) => {

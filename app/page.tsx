@@ -1,10 +1,11 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { BuyForm } from "@/components/buy-form";
 import { ProgressSample } from "@/components/progress-sample";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { formatUsd } from "@/lib/money";
-import { getDisplayPrices } from "@/lib/prices";
+import { fallbackPrices, getDisplayPrices, type DisplayPrices } from "@/lib/prices";
 
 const promises = [
   {
@@ -21,12 +22,26 @@ const promises = [
   },
 ];
 
-export default async function Home() {
-  const prices = await getDisplayPrices();
+const disabledPrices: DisplayPrices = { ...fallbackPrices, checkoutEnabled: false };
 
+export default function Home() {
   return (
     <div className="site">
       <SiteHeader />
+      <Suspense fallback={<HomeBody prices={disabledPrices} />}>
+        <HomeWithPrices />
+      </Suspense>
+    </div>
+  );
+}
+
+async function HomeWithPrices() {
+  return <HomeBody prices={await getDisplayPrices()} />;
+}
+
+function HomeBody({ prices }: { prices: DisplayPrices }) {
+  return (
+    <>
       <section className="hero">
         <div className="hero-copy gl-win">
           <div className="gl-win-bar">
@@ -142,6 +157,6 @@ export default async function Home() {
         </div>
       </section>
       <SiteFooter />
-    </div>
+    </>
   );
 }

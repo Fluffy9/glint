@@ -57,9 +57,9 @@
   padding: var(--space-8);
   border: var(--stroke-2) solid var(--line);
   border-radius: var(--radius-3);
-  background-color: var(--accent-soft);
-  background-image: url("../design-system/assets/Patterns/warp-check-tile.svg");
-  background-size: 220px;
+  background-color: var(--bg);
+  background-image: repeating-conic-gradient(var(--accent) 0 25%, transparent 0 50%);
+  background-size: 28px 28px;
   box-shadow: var(--elev-3);
 }
 

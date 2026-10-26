@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { BandPicker } from "@/components/band-picker";
 import { BuyForm } from "@/components/buy-form";
 import { ProgressSample } from "@/components/progress-sample";
 import { SiteFooter } from "@/components/site-footer";
@@ -63,6 +64,13 @@ function HomeBody({ prices }: { prices: DisplayPrices }) {
         </div>
       </section>
 
+      <section className="section" aria-labelledby="band-colour">
+        <h2 id="band-colour" className="h2">
+          Your band
+        </h2>
+        <BandPicker />
+      </section>
+
       <section className="section" aria-labelledby="promises">
         <h2 id="promises" className="h2">
           The offer
@@ -115,8 +123,9 @@ function HomeBody({ prices }: { prices: DisplayPrices }) {
           </div>
         </div>
         <p className="fine">
-          These figures are a picture of the app, not your data. The colour of
-          the page follows the band you pick above.
+          These figures are a picture of the app, not your data. The page
+          accent follows the band colour. Light and dark are the control in the
+          header.
         </p>
       </section>
 

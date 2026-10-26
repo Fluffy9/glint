@@ -3,18 +3,20 @@ import { ModeToggle } from "./mode-toggle";
 
 export function SiteLinks() {
   return (
-    <div className="site-nav-rest">
+    <>
       <nav className="site-links" aria-label="Site">
         <Link href="/pricing">Pricing</Link>
         <Link href="/privacy">Privacy</Link>
         <Link href="/security">Security</Link>
       </nav>
-      <Link className="site-signin" href="/login">
-        <UserIcon />
-        Sign in
-      </Link>
-      <ModeToggle />
-    </div>
+      <div className="site-actions">
+        <Link className="site-signin" href="/login">
+          <UserIcon />
+          Sign in
+        </Link>
+        <ModeToggle />
+      </div>
+    </>
   );
 }
 

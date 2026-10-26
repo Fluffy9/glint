@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { CompareSection } from "@/components/compare-section";
 import { HomeHero } from "@/components/home-hero";
 import { PriceSection } from "@/components/price-section";
 import { ProgressSample } from "@/components/progress-sample";
@@ -41,6 +42,8 @@ function HomeBody({ prices }: { prices: DisplayPrices }) {
       <HomeHero priceNote={`${formatUsd(prices.bandCents)} usd once`} />
 
       <div className="site">
+        <CompareSection />
+
         <section className="section" aria-labelledby="promises">
           <h2 id="promises" className="h2">
             The offer

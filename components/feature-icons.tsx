@@ -10,6 +10,7 @@ export const featureIconIds = [
   "no-bs",
   "screenless",
   "offline",
+  "no-account",
   "battery",
   "lock",
   "not-for-sale",

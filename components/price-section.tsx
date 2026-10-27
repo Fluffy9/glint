@@ -1,50 +1,74 @@
+import { BandPicker } from "@/components/band-picker";
 import { BuyForm } from "@/components/buy-form";
-import { RichCopy } from "@/components/rich-copy";
-import { copy, priceVars } from "@/content";
-import { formatUsd } from "@/lib/money";
+import { ProductShot } from "@/components/product-shot";
+import { copy, fill, priceVars } from "@/content";
+import { formatUsdLabel } from "@/lib/money";
 import type { DisplayPrices } from "@/lib/prices";
+import { site } from "@/content/site";
 
 export function PriceSection({ prices }: { prices: DisplayPrices }) {
   const vars = priceVars(prices);
+  const bandPrice = formatUsdLabel(prices.bandCents);
+  const backupPrice = formatUsdLabel(prices.backupCents);
 
   return (
-    <section className="section" id="band" aria-labelledby="prices">
-      <h2 id="prices" className="h2">
-        {copy.pricing.heading}
-      </h2>
-      <div className="price-grid">
-        <article className="gl-win gl-win-accent">
-          <div className="gl-win-bar">
-            <span className="gl-win-title">{copy.pricing.band}</span>
-          </div>
-          <div className="gl-win-body">
-            <p className="gl-stat-value" style={{ margin: 0 }}>
-              {formatUsd(prices.bandCents)}
-              <span className="gl-stat-unit">{copy.pricing.unit}</span>
+    <section className="product" aria-labelledby="product-title">
+      <ProductShot />
+      <div className="product-info">
+        <p className="product-kicker">{copy.pricing.kicker}</p>
+        <div className="product-title-row">
+          <h1 id="product-title" className="product-title">
+            {fill(copy.pricing.product, { name: site.name })}
+          </h1>
+          <p className="product-price">
+            {bandPrice}
+            <span>{copy.pricing.once}</span>
+          </p>
+        </div>
+        <p className="product-lede">{fill(copy.pricing.lede, vars)}</p>
+        <div className="product-band">
+          <BandPicker />
+        </div>
+
+        <ul className="product-offers">
+          <li>
+            <div>
+              <p className="product-offer-name">{copy.pricing.dashboard}</p>
+              <p className="product-offer-body">{copy.pricing.dashboardBody}</p>
+            </div>
+            <p className="product-offer-price">{copy.pricing.free}</p>
+          </li>
+          <li className="is-hardware">
+            <div>
+              <p className="product-offer-name">{copy.pricing.band}</p>
+              <p className="product-offer-body">{copy.pricing.bandBody}</p>
+            </div>
+            <p className="product-offer-price">
+              {bandPrice}
+              <span>{copy.pricing.once}</span>
             </p>
-            <p>{copy.pricing.bandBody}</p>
-            <BuyForm
-              enabled={prices.checkoutEnabled}
-              backupCents={prices.backupCents}
-              bandPaymentUrl={prices.bandPaymentUrl}
-              backupPaymentUrl={prices.backupPaymentUrl}
-            />
-          </div>
-        </article>
-        <article className="gl-win">
-          <div className="gl-win-bar">
-            <span className="gl-win-title">{copy.pricing.backup}</span>
-          </div>
-          <div className="gl-win-body">
-            <p className="gl-stat-value" style={{ margin: 0 }}>
-              {formatUsd(prices.backupCents)}
-              <span className="gl-stat-unit">{copy.pricing.backupUnit}</span>
+          </li>
+          <li>
+            <div>
+              <p className="product-offer-name">
+                {copy.pricing.backup}{" "}
+                <span className="product-offer-tag">{copy.pricing.optional}</span>
+              </p>
+              <p className="product-offer-body">{copy.pricing.backupBody}</p>
+            </div>
+            <p className="product-offer-price">
+              {backupPrice}
+              <span>{copy.pricing.backupUnit}</span>
             </p>
-            <p>
-              <RichCopy parts={copy.pricing.backupBody} vars={vars} />
-            </p>
-          </div>
-        </article>
+          </li>
+        </ul>
+
+        <BuyForm
+          enabled={prices.checkoutEnabled}
+          backupCents={prices.backupCents}
+          bandPaymentUrl={prices.bandPaymentUrl}
+          backupPaymentUrl={prices.backupPaymentUrl}
+        />
       </div>
     </section>
   );

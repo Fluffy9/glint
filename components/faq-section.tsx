@@ -11,7 +11,7 @@ export function FaqSection({
   const vars = priceVars(prices);
 
   return (
-    <section className="section" aria-labelledby="faq">
+    <section className="section section-align-center" aria-labelledby="faq">
       <h2 id="faq" className="h2">
         {copy.faq.heading}
       </h2>

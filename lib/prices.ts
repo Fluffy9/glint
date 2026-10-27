@@ -10,19 +10,38 @@ export type DisplayPrices = {
   bandCents: number;
   backupCents: number;
   checkoutEnabled: boolean;
+  bandPaymentUrl: string | null;
+  backupPaymentUrl: string | null;
 };
 
+export const closedCheckout = {
+  checkoutEnabled: false,
+  bandPaymentUrl: null,
+  backupPaymentUrl: null,
+} as const;
+
+export function paymentLinksFromEnv(env: Record<string, string | undefined>): Pick<
+  DisplayPrices,
+  "bandPaymentUrl" | "backupPaymentUrl" | "checkoutEnabled"
+> {
+  const bandPaymentUrl = env.NEXT_PUBLIC_STRIPE_LINK_BAND?.trim() || null;
+  const backupPaymentUrl = env.NEXT_PUBLIC_STRIPE_LINK_BACKUP?.trim() || null;
+  return {
+    bandPaymentUrl,
+    backupPaymentUrl,
+    checkoutEnabled: Boolean(bandPaymentUrl && backupPaymentUrl),
+  };
+}
+
 export async function getDisplayPrices(): Promise<DisplayPrices> {
+  const links = paymentLinksFromEnv(process.env);
+  const priced = { ...fallbackPrices, ...links };
   // GitHub Pages is a static export. There is no request and no Stripe call.
-  if (process.env.GITHUB_PAGES === "1") {
-    return { ...fallbackPrices, checkoutEnabled: false };
-  }
+  if (process.env.GITHUB_PAGES === "1") return priced;
   await connection();
   const bandPrice = process.env.STRIPE_PRICE_BAND;
   const backupPrice = process.env.STRIPE_PRICE_BACKUP;
-  if (!process.env.STRIPE_SECRET_KEY || !bandPrice || !backupPrice) {
-    return { ...fallbackPrices, checkoutEnabled: false };
-  }
+  if (!process.env.STRIPE_SECRET_KEY || !bandPrice || !backupPrice) return priced;
 
   try {
     const stripe = getStripe();
@@ -31,11 +50,11 @@ export async function getDisplayPrices(): Promise<DisplayPrices> {
       stripe.prices.retrieve(backupPrice),
     ]);
     return {
+      ...priced,
       bandCents: band.unit_amount ?? fallbackPrices.bandCents,
       backupCents: backup.unit_amount ?? fallbackPrices.backupCents,
-      checkoutEnabled: true,
     };
   } catch {
-    return { ...fallbackPrices, checkoutEnabled: false };
+    return priced;
   }
 }

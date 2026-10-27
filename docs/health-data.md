@@ -18,7 +18,7 @@ Turning a category off deletes the copy that is no longer allowed. Account delet
 
 ## Schemas and roles
 
-`commerce` holds orders and subscriptions. `health` will hold ciphertext metadata, destinations, and grants. The Stripe webhook connects as `commerce_ingest`, which is granted only on `commerce`.
+Firestore holds orders, pending entitlements, and `entitlements/{uid}.paidUntil`. Firebase Storage holds ciphertext at `backups/{uid}/{category}/{id}`. Clients can read an entitlement and upload only while `paidUntil` is in the future. Orders are not readable from the client. The Stripe webhook is a Cloud Function. It does not write a subscription.
 
 Enforced by the Commerce schema test and the Commerce role test (`pnpm test:db`).
 

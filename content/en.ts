@@ -20,6 +20,8 @@ export const en = {
     privacy: "Privacy",
     security: "Security",
     signIn: "Sign in",
+    account: "Account",
+    signOut: "Sign out",
     footer: "Footer",
     bandColour: "Band colour",
     switchMode: "Switch to {mode} mode",
@@ -81,7 +83,7 @@ export const en = {
       {
         id: "trash",
         title: "Delete anytime",
-        body: "Coming soon: delete your account and we delete our copies. Until then, write to us and we will do it by hand.",
+        body: "Delete the account and we delete the backup copies we hold.",
       },
     ],
   },
@@ -231,7 +233,7 @@ export const en = {
       {
         question: "What if I forget my password?",
         answer: [
-          "You can reset it any time and keep using {name}. Backups made with the old password stay locked, because we cannot unlock them for you. If you find the old password, enter it and they open again. Your phone copy is not affected, and you can export a plain copy first.",
+          "If you forget the password, the backup stays locked. We cannot unlock it. If you find the password, enter it and the backup opens again. Your phone copy is not affected, and you can export a plain copy first.",
         ],
       },
       {
@@ -248,7 +250,9 @@ export const en = {
       {
         question: "Can I export or delete my data?",
         answer: [
-          "Export a plain CSV or JSON anytime. Account deletion is coming soon. Until then, write to us and we will delete everything we hold by hand.",
+          "Export a plain CSV or JSON anytime. Signed in, you can delete the account and the backup copies we hold from the ",
+          { href: "/account", label: "account page" },
+          ".",
         ],
       },
     ],
@@ -262,8 +266,10 @@ export const en = {
     backup: "Backup",
     unit: "usd",
     backupUnit: "usd / year",
+    payBackup: "Add a year of backup,",
+    checkoutOff: "Checkout is off until payments are configured.",
     backupBody: [
-      "Optional. Backup is locked with your password before it leaves your phone. Cancel it and the band still works. ",
+      "Optional. One payment covers a year. We email you before it ends. Backup is locked with your password before it leaves your phone. The band still works if you skip it. ",
       { href: "/privacy", label: "How encryption works." },
     ],
   },
@@ -272,7 +278,7 @@ export const en = {
     description: "What {name} stores, and how encrypted backup works.",
     blocks: [
       {
-        p: "This website takes payment through Stripe. We store the email on the order, whether you bought the band, whether backup is on, and the status of that subscription. We do not collect heart rate, sleep, or activity here in readable form.",
+        p: "This website takes payment through Stripe. We store the email on the order, whether you bought the band, and the date backup is paid through. We do not collect heart rate, sleep, or activity here in readable form.",
       },
       { h: "On the phone" },
       {
@@ -299,7 +305,7 @@ export const en = {
       { p: "An app on your phone can receive a category from the phone. The phone already has the samples." },
       { h: "Deleting your data" },
       {
-        p: "Turning a category off stops it from being backed up. Account deletion is coming soon. Until then, write to us and we will delete the copies we hold by hand.",
+        p: "Turning a category off stops it from being backed up. Delete the account on the site and we delete the backup copies we hold. The phone copy stays on the phone until you delete it there.",
       },
       {
         p: ["We do not sell your data. ", { href: "/security", label: "Security" }, " lists what this site does today."],
@@ -312,7 +318,7 @@ export const en = {
     blocks: [
       { h: "Payments" },
       {
-        p: "Card numbers stay at Stripe. Checkout is Stripe's page. {name} stores the order email, whether you bought the band and backup, and the subscription status.",
+        p: "Card numbers stay at Stripe. Checkout is Stripe's page. {name} stores the order email, whether you bought the band and backup, and the date backup is paid through.",
       },
       { h: "This website" },
       {
@@ -331,7 +337,7 @@ export const en = {
         p: "You are trusting the app and this website to run the code we publish. We cannot unlock a backup for you, which also means that if the password is lost and there is no phone copy or export, that backup is gone. Resetting your password does not unlock old backups.",
       },
       {
-        p: "Account deletion is coming soon. Until then, write to us and we will delete the copies we hold by hand.",
+        p: "Delete the account while signed in and we delete the backup copies we hold, then the sign-in. Stripe keeps the receipt. We still cannot read a backup.",
       },
       { p: ["The same rules are written in plain language on ", { href: "/privacy", label: "Privacy" }, "."] },
     ],
@@ -339,14 +345,56 @@ export const en = {
   login: {
     title: "Sign in",
     description: "Sign in to a {name} account.",
-    body: "An account is where a backup lives after you choose to send a copy off the phone. Sign-in is not open on this site yet.",
+    body: "An account is where a backup lives after you choose to send a copy off the phone. We email you a sign-in link. There is no password for the account itself.",
     pricing: "See pricing",
+  },
+  account: {
+    title: "Account",
+    description: "Sign in with an email link to manage backup.",
+    emailLabel: "Email",
+    sendLink: "Email me a sign-in link",
+    sent: "Check your email for the sign-in link.",
+    notConfigured: "Sign-in is not configured on this site yet.",
+    emulatorNote: "This browser is talking to the local emulators. No email is sent.",
+    openLink: "Open the sign-in link",
+    checking: "Checking sign-in…",
+    statusLabel: "Status",
+    signedIn: "Signed in as {email}",
+    backupNone: "No backup uploaded yet",
+    backupReady: "Ready for a test backup",
+    backupSaved: "Locked test backup on file",
+    testTitle: "Test backup",
+    testBody:
+      "Encrypt the sample text with a passphrase and upload the ciphertext. Then unlock it locally to prove the round trip.",
+    sampleLabel: "Sample text",
+    passphrase: "Backup passphrase",
+    saveBackup: "Save a test backup",
+    blobLockedLabel: "Encrypted upload",
+    blobUnlockedLabel: "Unlocked locally",
+    unlockPassphrase: "Passphrase",
+    unlockBackup: "Unlock locally",
+    unlockedTitle: "Unlocked locally",
+    unlockedBody: "This browser decrypted the downloaded ciphertext. The server never saw the passphrase.",
+    unlockFailed: "Could not unlock that backup. Check the passphrase.",
+    saveAnother: "Save another test backup",
+    deleteTitle: "Delete account",
+    deleteBody:
+      "This deletes the backup copies we hold and the sign-in. It does not delete the Stripe receipt. Your phone copy stays on the phone.",
+    confirmLabel: "Type DELETE to confirm",
+    deleteButton: "Delete account",
+    deleted: "The account is deleted.",
+    failed: "That did not work. Try the sign-in link again.",
+    sendFailed: "Could not send a sign-in link. Check that the local emulators are running.",
+    backupFailed: "Could not save the backup.",
+    backupFailedEmulator:
+      "Could not save the backup. Check that the local emulators are running (storage on 9199).",
+    deleteFailed: "Could not delete the account.",
   },
   checkout: {
     successTitle: "Order received",
     // CONFIRM: add the real ship estimate once the hardware is final.
     successBody:
-      "Stripe has the payment. We will email you when the band is ready to ship. The band works without backup, and if you added backup you can cancel it and the band still works.",
+      "Stripe has the payment. We will email you when the band is ready to ship. If you bought a year of backup, we email you before it ends.",
     back: "Back to {name}",
     cancelTitle: "Checkout canceled",
     cancelBody: "No charge was made.",

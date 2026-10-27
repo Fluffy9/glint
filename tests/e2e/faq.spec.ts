@@ -5,10 +5,12 @@ const questions = [
   ["How much does Glint cost?", "$69.99 once"],
   ["Is there a subscription?", "Optional encrypted backup is $10 a year"],
   ["Why is there no screen?", "So your wrist stays quiet"],
-  ["Where does my data live?", "We store ciphertext only"],
+  ["What does local first mean?", "stored on your phone"],
+  ["Where does my data live?", "ciphertext only"],
   ["What if I forget my password?", "the backup stays locked"],
+  ["What happens to my backup if I stop paying?", "30 days"],
   ["Do you sell my data?", "We also cannot read your backup"],
-  ["Can I export or delete my data?", "Google Drive"],
+  ["Can I export or delete my data?", "CSV or JSON"],
 ] as const;
 
 test("shows the FAQ and opens an answer on the homepage", async ({ page }) => {

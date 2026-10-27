@@ -118,11 +118,13 @@ a.gl-btn-primary,
   align-items: center;
   gap: 6px;
   padding: 0 12px 0 10px;
+  font: inherit;
   font-family: var(--font-mono);
   font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .nav-mode {
@@ -1215,6 +1217,398 @@ a.gl-btn {
   align-items: flex-start;
   gap: var(--space-4);
   margin-top: var(--space-4);
+}
+
+.site-account {
+  max-width: none;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding-inline: 0;
+}
+
+.site-account .site-nav,
+.site-account .site-footer {
+  width: min(1080px, 100%);
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+.site-account .site-nav {
+  margin-bottom: var(--space-4);
+}
+
+.account-stage {
+  position: relative;
+  flex: 1 0 auto;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: min(70dvh, 720px);
+  padding: var(--space-8) var(--space-4) var(--space-12);
+  --gl-warp-cell: var(--accent-soft);
+  --gl-warp-ground: var(--bg);
+  --gl-warp-star: var(--bg);
+}
+
+.account-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 42%, color-mix(in oklab, var(--surface) 72%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in oklab, var(--bg) 55%, transparent), transparent 28%, transparent 72%, var(--bg));
+}
+
+.account-stage-field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  animation: accountFieldDrift 28s var(--ease-out) infinite alternate;
+}
+
+.account-stage-field .gl-warp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: auto;
+  max-width: none;
+  transform: translate(-50%, -50%);
+}
+
+.account-panel-shell {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 26rem);
+  padding: var(--space-8) var(--space-6);
+  animation: accountPanelIn var(--dur-sheen) var(--ease-out) both;
+}
+
+.account-panel-shell .h1 {
+  margin: 0 0 var(--space-2);
+  text-transform: uppercase;
+  font-size: clamp(40px, 8vw, 56px);
+  line-height: 1;
+  text-align: center;
+}
+
+.account-lede {
+  margin: 0 0 var(--space-6);
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.account-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.account-status {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-1);
+  background: var(--surface-sunken);
+  text-align: left;
+}
+
+.account-status-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.account-status-line {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.account-status-backup {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.account-status-backup.is-saved {
+  color: var(--success);
+}
+
+.account-status-backup.is-unlocked {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.account-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--stroke-2) solid var(--success);
+  border-radius: var(--radius-1);
+  background: color-mix(in oklab, var(--success) 12%, var(--surface));
+  text-align: left;
+}
+
+.account-result-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--success);
+}
+
+.account-result-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--ink);
+  text-align: left;
+}
+
+.account-blob {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-1);
+  background: var(--surface);
+  box-shadow: var(--elev-1);
+  text-align: left;
+}
+
+.account-blob.is-unlocked {
+  border-color: var(--success);
+}
+
+.account-blob-label {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.account-blob.is-unlocked .account-blob-label {
+  color: var(--success);
+}
+
+.account-blob-text {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-1);
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.account-blob.is-unlocked .account-blob-text {
+  border-color: var(--success);
+  background: color-mix(in oklab, var(--success) 10%, var(--surface));
+}
+
+.account-sample {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border: var(--stroke-2) dashed var(--line);
+  border-radius: var(--radius-1);
+  background: var(--surface-sunken);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+}
+
+.account-section-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.account-section-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--ink-muted);
+  text-align: left;
+}
+
+.account-panel .account-notice-error {
+  margin: 0;
+  padding: var(--space-4);
+  border: var(--stroke-2) solid var(--danger);
+  border-radius: var(--radius-1);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+}
+
+.account-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+}
+
+.account-skeleton-line {
+  display: block;
+  height: 16px;
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-1);
+  background-color: var(--surface-sunken);
+  background-image: repeating-conic-gradient(var(--line-subtle) 0 25%, transparent 0 50%);
+  background-size: var(--dither-tile) var(--dither-tile);
+  animation: accountSkeletonPulse var(--dur-glint) var(--ease-out) infinite alternate;
+}
+
+.account-skeleton-line-lg {
+  height: 40px;
+}
+
+.account-skeleton-line:nth-child(1) {
+  width: 55%;
+  align-self: center;
+}
+
+.account-skeleton-line:nth-child(2) {
+  width: 100%;
+}
+
+.account-skeleton-line:nth-child(3) {
+  width: 72%;
+}
+
+.site-signin-skeleton {
+  width: 7.5rem;
+  height: 36px;
+  border: var(--stroke-2) solid var(--line);
+  border-radius: var(--radius-1);
+  background-color: var(--surface-sunken);
+  background-image: repeating-conic-gradient(var(--line-subtle) 0 25%, transparent 0 50%);
+  background-size: var(--dither-tile) var(--dither-tile);
+  box-shadow: var(--elev-1);
+  animation: accountSkeletonPulse var(--dur-glint) var(--ease-out) infinite alternate;
+}
+
+@keyframes accountSkeletonPulse {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-skeleton-line,
+  .site-signin-skeleton {
+    animation: none;
+  }
+}
+
+.account-panel .buy-form {
+  width: 100%;
+  margin-top: 0;
+  align-items: stretch;
+}
+
+.account-panel .gl-field {
+  width: 100%;
+}
+
+.account-panel .h2 {
+  margin: 0;
+}
+
+.account-panel .buy-form > p,
+.account-panel > p {
+  margin: 0;
+  text-align: center;
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.account-panel .buy-form > a {
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.account-panel .fine {
+  margin: 0;
+  max-width: none;
+  text-align: center;
+}
+
+.account-panel .gl-btn {
+  width: 100%;
+  justify-content: center;
+}
+
+@keyframes accountPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes accountFieldDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-1.5%, -1%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-panel-shell,
+  .account-stage-field {
+    animation: none;
+  }
 }
 
 .band-picker {

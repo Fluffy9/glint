@@ -5,9 +5,9 @@ import { FeaturesSection } from "@/components/features-section";
 import { HomeHero } from "@/components/home-hero";
 import { SiteFooter } from "@/components/site-footer";
 import { copy, fill, priceVars } from "@/content";
-import { fallbackPrices, getDisplayPrices, type DisplayPrices } from "@/lib/prices";
+import { closedCheckout, fallbackPrices, getDisplayPrices, type DisplayPrices } from "@/lib/prices";
 
-const disabledPrices: DisplayPrices = { ...fallbackPrices, checkoutEnabled: false };
+const disabledPrices: DisplayPrices = { ...fallbackPrices, ...closedCheckout };
 
 export default function Home() {
   return (

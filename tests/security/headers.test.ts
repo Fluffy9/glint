@@ -19,6 +19,7 @@ describe("Browser headers", () => {
     expect(scriptSrc).not.toMatch(/\*/);
     expect(scriptSrc).not.toContain("https:");
     expect(scriptSrc).not.toContain("'unsafe-inline'");
+    expect(scriptSrc).not.toContain("'unsafe-eval'");
     expect(scriptSrc).toContain("'nonce-test-nonce'");
   });
 
@@ -40,9 +41,14 @@ describe("Browser headers", () => {
     }).get("content-security-policy");
 
     expect(production).not.toContain("'unsafe-inline' https://fonts.googleapis.com");
+    expect(production).not.toContain("127.0.0.1");
+    expect(production).not.toContain("'unsafe-eval'");
     expect(development).toContain(
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     );
+    expect(development).toContain("'unsafe-eval'");
+    expect(development).toContain("http://127.0.0.1:9099");
+    expect(development).toContain("http://127.0.0.1:9199");
   });
 
   it("sends nosniff, a strict referrer, and HSTS in production", () => {

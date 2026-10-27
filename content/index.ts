@@ -12,6 +12,7 @@ export type CopyVars = {
   backupPrice: string;
   competitor?: string;
   mode?: string;
+  email?: string;
 };
 
 export function priceVars(prices: Pick<DisplayPrices, "bandCents" | "backupCents">): CopyVars {

@@ -1,8 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { copy } from "@/content";
+import { clearAccountSession } from "@/lib/account-session";
+import { useAccountChrome } from "@/lib/use-account-chrome";
 import { ModeToggle } from "./mode-toggle";
 
 export function SiteLinks() {
+  const router = useRouter();
+  const chrome = useAccountChrome();
+
   return (
     <>
       <nav className="site-links" aria-label={copy.nav.site}>
@@ -11,10 +19,31 @@ export function SiteLinks() {
         <Link href="/security">{copy.nav.security}</Link>
       </nav>
       <div className="site-actions">
-        <Link className="site-signin" href="/login">
-          <UserIcon />
-          {copy.nav.signIn}
-        </Link>
+        {chrome === "checking" ? (
+          <span className="site-signin-skeleton" role="status" aria-label={copy.account.checking} />
+        ) : chrome === "in" ? (
+          <>
+            <Link className="site-signin" href="/account">
+              <UserIcon />
+              {copy.nav.account}
+            </Link>
+            <button
+              type="button"
+              className="site-signin"
+              onClick={() => {
+                clearAccountSession();
+                router.replace("/login");
+              }}
+            >
+              {copy.nav.signOut}
+            </button>
+          </>
+        ) : (
+          <Link className="site-signin" href="/login">
+            <UserIcon />
+            {copy.nav.signIn}
+          </Link>
+        )}
         <ModeToggle />
       </div>
     </>

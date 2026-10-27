@@ -8,6 +8,7 @@ const groups = [
       ["Home", "/"],
       ["Pricing", "/pricing"],
       ["Sign in", "/login"],
+      ["Account", "/account"],
     ],
   },
   {

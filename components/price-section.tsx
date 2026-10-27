@@ -23,7 +23,12 @@ export function PriceSection({ prices }: { prices: DisplayPrices }) {
               <span className="gl-stat-unit">{copy.pricing.unit}</span>
             </p>
             <p>{copy.pricing.bandBody}</p>
-            <BuyForm enabled={prices.checkoutEnabled} backupCents={prices.backupCents} />
+            <BuyForm
+              enabled={prices.checkoutEnabled}
+              backupCents={prices.backupCents}
+              bandPaymentUrl={prices.bandPaymentUrl}
+              backupPaymentUrl={prices.backupPaymentUrl}
+            />
           </div>
         </article>
         <article className="gl-win">

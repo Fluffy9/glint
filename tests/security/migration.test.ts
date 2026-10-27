@@ -21,10 +21,7 @@ describe("Commerce schema", () => {
   });
 
   it("does not let the webhook import health storage", () => {
-    const webhook = readFileSync(
-      new URL("../../app/api/stripe/webhook/route.ts", import.meta.url),
-      "utf8",
-    );
+    const webhook = readFileSync(new URL("../../functions/src/index.ts", import.meta.url), "utf8");
     const database = readFileSync(new URL("../../lib/commerce-db.ts", import.meta.url), "utf8");
     for (const source of [webhook, database]) {
       expect(source).not.toContain("lib/health");

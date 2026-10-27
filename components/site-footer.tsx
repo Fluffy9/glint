@@ -10,6 +10,7 @@ const groups = [
       { href: "/", label: copy.footer.home },
       { href: "/pricing", label: copy.nav.pricing },
       { href: "/login", label: copy.nav.signIn },
+      { href: "/account", label: copy.account.title },
     ],
   },
   {

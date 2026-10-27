@@ -25,6 +25,14 @@ describe("reviewPaint", () => {
     expect(flashed.detail).toContain("panel: Create a passkey");
   });
 
+  it("settles on needs-recovery when the vault has no passkey", () => {
+    const report = reviewPaint([marks.checking, marks["needs-recovery"]], {
+      only: ["checking", "needs-recovery"],
+      settle: "needs-recovery",
+    });
+    expect(report.ok).toBe(true);
+  });
+
   it("rejects one frame that mixes create and unlock", () => {
     const report = reviewPaint([["panel: Create a passkey", "panel: Unlock"]], {
       only: ["checking", "create", "unlock"],

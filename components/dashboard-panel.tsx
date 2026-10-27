@@ -23,6 +23,7 @@ import { browserFetch, firebaseClient } from "@/lib/client-firebase";
 import { createPasskey, unlockPasskey } from "@/lib/passkey";
 import { readLocalVault, writeLocalVault, type LocalVault } from "@/lib/vault-db";
 import { VAULT_FLAG_EVENT, readVaultFlag, writeVaultFlag } from "@/lib/vault-flag";
+import { mergeRestoredVault } from "@/lib/vault-restore";
 import { storeBandBytes } from "@/lib/vault-samples";
 
 type Step = "save" | "restore" | "add-passkey" | "open";
@@ -70,8 +71,33 @@ export function DashboardPanel({
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [passkeyCount, setPasskeyCount] = useState<number | null>(null);
   const pushedHeader = useRef<string | null>(null);
-  const screen = step ?? (present === null ? "checking" : present ? "unlock" : "create");
+  const waitingOnVault = present === true && passkeyCount === null && step === null;
+  const screen =
+    step ??
+    (present === null || waitingOnVault
+      ? "checking"
+      : present
+        ? passkeyCount && passkeyCount > 0
+          ? "unlock"
+          : "needs-recovery"
+        : "create");
+
+  useEffect(() => {
+    if (present !== true) {
+      setPasskeyCount(null);
+      return;
+    }
+    let cancel = false;
+    void readLocalVault().then((stored) => {
+      if (cancel) return;
+      setPasskeyCount(stored?.record.passkeys.length ?? 0);
+    });
+    return () => {
+      cancel = true;
+    };
+  }, [present, step, vault]);
 
   useEffect(() => {
     if (screen !== "open" || !dataKey || !vault) return;
@@ -150,6 +176,7 @@ export function DashboardPanel({
       const next: LocalVault = { record: created.record, samples: [], capability: null, paidUntil: null };
       await writeLocalVault(next);
       setVault(next);
+      setPasskeyCount(1);
       setDataKey(created.dataKey);
       setRecoveryKey(created.recoveryKey);
       setSaved(false);
@@ -176,6 +203,7 @@ export function DashboardPanel({
       const material = await unlockPasskey(stored.record.passkeys);
       const key = await openWithPasskey(stored.record, material.credentialId, material.prfOutput);
       setVault(stored);
+      setPasskeyCount(stored.record.passkeys.length);
       setDataKey(key);
       setStep("open");
     } catch (caught) {
@@ -190,13 +218,15 @@ export function DashboardPanel({
     setPending(true);
     try {
       const imported = await importVaultFromRecovery(recoveryInput.trim());
-      const next: LocalVault = { record: imported.record, samples: [], capability: null, paidUntil: null };
+      const existing = await readLocalVault();
+      const next = mergeRestoredVault(existing, imported);
       await writeLocalVault(next);
       writeVaultFlag(localStorage, true);
       setVault(next);
+      setPasskeyCount(next.record.passkeys.length);
       setDataKey(imported.dataKey);
       setRecoveryInput("");
-      setStep("add-passkey");
+      setStep(next.record.passkeys.length > 0 ? "open" : "add-passkey");
     } catch {
       setError(copy.dashboard.failed);
     } finally {
@@ -214,6 +244,7 @@ export function DashboardPanel({
       const next = { ...vault, record };
       await writeLocalVault(next);
       setVault(next);
+      setPasskeyCount(next.record.passkeys.length);
       setStep("open");
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : copy.dashboard.failed);
@@ -241,6 +272,12 @@ export function DashboardPanel({
     }
   }
 
+  function leaveRestore() {
+    setError(null);
+    setRecoveryInput("");
+    setStep(null);
+  }
+
   return (
     <div className="account-panel">
       {screen === "checking" ? (
@@ -253,7 +290,7 @@ export function DashboardPanel({
             {copy.dashboard.create}
           </button>
           <p>
-            <button type="button" onClick={() => setStep("restore")}>
+            <button type="button" className="account-text-link" onClick={() => setStep("restore")}>
               {copy.dashboard.haveRecovery}
             </button>
           </p>
@@ -263,14 +300,11 @@ export function DashboardPanel({
       {screen === "save" && recoveryKey ? (
         <>
           <p>{copy.dashboard.saveWarning}</p>
-          <p className="paint-skip">{recoveryKey}</p>
-          <button
-            type="button"
-            onClick={() => void navigator.clipboard.writeText(recoveryKey)}
-          >
+          <p className="dashboard-recovery-key paint-skip">{recoveryKey}</p>
+          <button type="button" className="gl-btn" onClick={() => void navigator.clipboard.writeText(recoveryKey)}>
             {copy.dashboard.copy}
           </button>
-          <label>
+          <label className="dashboard-check">
             <input type="checkbox" checked={saved} onChange={(event) => setSaved(event.target.checked)} />
             {copy.dashboard.saved}
           </label>
@@ -286,18 +320,35 @@ export function DashboardPanel({
             {copy.dashboard.unlock}
           </button>
           <p>
-            <button type="button" onClick={() => setStep("restore")}>
+            <button type="button" className="account-text-link" onClick={() => setStep("restore")}>
               {copy.dashboard.haveRecovery}
             </button>
           </p>
         </>
       ) : null}
 
+      {screen === "needs-recovery" ? (
+        <>
+          <p>{copy.dashboard.noPasskey}</p>
+          <button className="gl-btn gl-btn-primary" type="button" onClick={() => setStep("restore")}>
+            {copy.dashboard.pasteRecovery}
+          </button>
+        </>
+      ) : null}
+
       {screen === "restore" ? (
         <>
-          <label>
-            {copy.dashboard.recoveryLabel}
-            <input value={recoveryInput} onChange={(event) => setRecoveryInput(event.target.value)} />
+          <label className="gl-field">
+            <span className="gl-field-label">{copy.dashboard.recoveryLabel}</span>
+            <textarea
+              className="dashboard-recovery-input"
+              value={recoveryInput}
+              rows={3}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              onChange={(event) => setRecoveryInput(event.target.value)}
+            />
           </label>
           <button
             className="gl-btn gl-btn-primary"
@@ -307,6 +358,11 @@ export function DashboardPanel({
           >
             {copy.dashboard.continue}
           </button>
+          <p>
+            <button type="button" className="account-text-link" onClick={leaveRestore}>
+              {copy.dashboard.recoveryBack}
+            </button>
+          </p>
         </>
       ) : null}
 
@@ -316,7 +372,7 @@ export function DashboardPanel({
             {copy.dashboard.addPasskey}
           </button>
           <p>
-            <button type="button" onClick={() => setStep("open")}>
+            <button type="button" className="account-text-link" onClick={() => setStep("open")}>
               {copy.dashboard.skip}
             </button>
           </p>
@@ -325,11 +381,16 @@ export function DashboardPanel({
 
       {screen === "open" && vault ? (
         <>
-          <button className="gl-btn gl-btn-primary" type="button" disabled={pending || connected} onClick={() => void onConnect()}>
+          <button
+            className="gl-btn gl-btn-primary"
+            type="button"
+            disabled={pending || connected}
+            onClick={() => void onConnect()}
+          >
             {connected ? copy.dashboard.connected : copy.dashboard.connect}
           </button>
           {vault.samples.length > 0 ? (
-            <ul>
+            <ul className="dashboard-samples">
               {vault.samples.map((sample) => (
                 <li key={sample.id}>
                   {copy.dashboard.sample} {sample.recordedAt}
@@ -337,8 +398,8 @@ export function DashboardPanel({
               ))}
             </ul>
           ) : null}
-          <section>
-            <h2>{copy.dashboard.backup}</h2>
+          <section className="dashboard-backup">
+            <h2 className="account-section-title">{copy.dashboard.backup}</h2>
             {vault.paidUntil ? (
               <p>
                 {copy.dashboard.paidThrough} {vault.paidUntil.slice(0, 10)}
@@ -352,13 +413,14 @@ export function DashboardPanel({
             )}
           </section>
           <p>
-            <button type="button" disabled={pending} onClick={() => void onAddPasskey()}>
+            <button type="button" className="account-text-link" disabled={pending} onClick={() => void onAddPasskey()}>
               {copy.dashboard.addPasskey}
             </button>
           </p>
           <p>
             <button
               type="button"
+              className="account-text-link"
               onClick={() => {
                 setDataKey(null);
                 setConnected(false);

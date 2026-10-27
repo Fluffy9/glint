@@ -1,21 +1,31 @@
 import { copy } from "@/content";
 
-export type Screen = "checking" | "create" | "unlock";
+export type Screen = "checking" | "create" | "unlock" | "needs-recovery";
 
 const screenName: Record<Screen, string> = {
   checking: "checking",
   create: "create",
   unlock: "unlock",
+  "needs-recovery": "needs recovery",
 };
 
 /** Every visible dashboard mark, in reading order. A frame may be a subset of one screen. The settled frame must be the whole screen. */
 export function screenMarks(): Record<Screen, string[]> {
+  const title = "title: Dashboard";
   const lede = `lede: ${copy.dashboard.lede}`;
+  const header = "header: Dashboard";
   const recovery = `panel: ${copy.dashboard.haveRecovery}`;
   return {
-    checking: ["header: Dashboard", "panel: Opening dashboard…"],
-    create: ["header: Dashboard", "title: Dashboard", lede, `panel: ${copy.dashboard.create}`, recovery],
-    unlock: ["header: Dashboard", "title: Dashboard", lede, `panel: ${copy.dashboard.unlock}`, recovery],
+    checking: [header, title, lede, "panel: Opening dashboard…"],
+    create: [header, title, lede, `panel: ${copy.dashboard.create}`, recovery],
+    unlock: [header, title, lede, `panel: ${copy.dashboard.unlock}`, recovery],
+    "needs-recovery": [
+      header,
+      title,
+      lede,
+      `panel: ${copy.dashboard.noPasskey}`,
+      `panel: ${copy.dashboard.pasteRecovery}`,
+    ],
   };
 }
 

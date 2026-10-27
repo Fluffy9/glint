@@ -1,53 +1,82 @@
 # Glint
 
-Glint is a screenless fitness band. This repository is the website and the record of band and backup purchases.
+Glint is a screenless fitness band. You buy it once. Heart rate, sleep, and movement stay in your browser first. Optional encrypted backup is the only paid cloud piece, and the band keeps working if you skip it.
 
-The band is $69.99 once. It works with no subscription. Backup is $10 for a year and optional. When the year is close, we email a new payment link. Skipping backup does not stop the band.
+This repository is the marketing site, the browser vault on `/dashboard`, Stripe checkout records, and the Cloud Functions that store ciphertext. It is not a cloud fitness account.
 
-This website collects payment data through Stripe. Band samples stay on the device in a browser vault. The site never holds plaintext samples or a master passphrase. The rules for storing health data later are in [docs/health-data.md](docs/health-data.md). What is already enforced, and what is still a human gate, is in [docs/security.md](docs/security.md).
+Planned prices: **$69.99** for the band once, **$10** a year for backup. Checkout is Stripe Payment Links. Amounts on the page come from Stripe when configured, otherwise from fallbacks in `lib/prices.ts`.
+
+## How it works
+
+```text
+Band (Web Bluetooth) ──► browser encrypts samples ──► IndexedDB vault
+                                                         │
+                              paid backup (optional) ────┘
+                                                         ▼
+                                              Firebase Storage (ciphertext only)
+```
+
+There is **no sign-in and no Firebase Auth user**. A vault is local:
+
+1. The browser creates a data key and wraps it with a passkey (WebAuthn PRF) and a one-time recovery key.
+2. `localStorage` only records that a vault exists so the first paint can show Create or Unlock. IndexedDB holds the wraps and sample ciphertext.
+3. Unlock is passkey or pasted recovery key. A new Stripe payment does not unwrap old ciphertext.
+4. If backup is paid, the browser redeems a short-lived upload capability from the paid checkout (email + `vaultId`). Cloud Functions check that capability and `paidUntil`, then write blobs the client cannot overwrite. The server never sees the data key or plaintext samples.
+
+Details: [docs/health-data.md](docs/health-data.md) and [docs/security.md](docs/security.md).
+
+## Repository map
+
+| Area | Role |
+| --- | --- |
+| `app/`, `components/`, `content/` | Next.js site (landing, pricing, compare, privacy, security, dashboard) |
+| `lib/vault-*.ts`, `lib/passkey.ts`, `lib/band.ts` | Local vault, passkeys, band / fixture source |
+| `functions/` | Stripe webhook, redeem / upload / download / delete backup, renewal jobs |
+| `firestore.rules`, `storage.rules` | Clients cannot write orders or backup objects |
+| `docs/` | Health destinations and security controls |
+
+Dev-only dashboard fixtures and page screenshots load only when `NODE_ENV === "development"`. They are not part of production builds.
 
 ## Run
 
 ```sh
 pnpm install
 cp .env.example .env
+pnpm --dir functions install
 pnpm dev
 ```
 
-Checkout stays disabled until `NEXT_PUBLIC_STRIPE_LINK_BAND` and `NEXT_PUBLIC_STRIPE_LINK_BACKUP` are set. Those are Stripe Payment Links (one for the band, one for a year of backup). Amounts on the page come from `STRIPE_PRICE_BAND` and `STRIPE_PRICE_BACKUP` when `STRIPE_SECRET_KEY` is set, and otherwise from the fallback prices.
+Checkout stays off until `NEXT_PUBLIC_STRIPE_LINK_BAND` and `NEXT_PUBLIC_STRIPE_LINK_BACKUP` are set.
 
-### Dashboard vault
+### Local backup (emulators)
 
-Open `/dashboard`. Create a passkey (WebAuthn with PRF) to wrap a local data key, and save the recovery key when it is shown. Unlock with the passkey or paste the recovery key. Connect a band (or, in `pnpm dev`, the fixture band) to encrypt samples into IndexedDB. Paid backup uploads the already-encrypted vault blob to Firebase Storage with a short-lived capability minted from Stripe checkout. There is no Firebase Auth user and no email sign-in.
-
-### Local backup emulators
-
-Backup storage is Firebase. In `pnpm dev`, with no Firebase keys in `.env`, the dashboard talks to the local emulators. Java 21+ is required.
+With no Firebase keys in `.env`, `/dashboard` talks to Firebase emulators through `/__glint/*`. Java 21+ is required.
 
 ```sh
-pnpm --dir functions install
 pnpm emulators
 ```
 
-In another terminal, `pnpm dev`, then record a paid year:
+In another terminal:
 
 ```sh
 pnpm seed:purchase buyer@example.com
+pnpm dev
 ```
 
-Open `http://localhost:3000/dashboard` or `http://127.0.0.1:3000/dashboard` and stay on that host. Emulator calls go through `/__glint/*` so the browser stays same-origin. After unlock, use the seeded checkout session to redeem an upload capability, then upload or restore a backup. Real Stripe Payment Links can hit the same webhook:
+Open `http://localhost:3000/dashboard` (or `127.0.0.1`) and stay on that host. Create or unlock a vault, redeem the seeded session, then upload or restore ciphertext. Forward real Payment Links with:
 
 ```sh
 stripe listen --forward-to http://127.0.0.1:5001/glint-local/us-central1/stripeWebhook
 ```
 
-`COMMERCE_DATABASE_URL` is only for the older commerce schema test. Apply [supabase/migrations/20261026000000_commerce.sql](supabase/migrations/20261026000000_commerce.sql) before `pnpm test:db`. New purchases are stored in Firestore, not that database.
+`COMMERCE_DATABASE_URL` is only for the older Supabase commerce schema test. Apply [supabase/migrations/20261026000000_commerce.sql](supabase/migrations/20261026000000_commerce.sql) before `pnpm test:db`. Live purchases land in Firestore.
 
 ## Tests
 
 ```sh
 pnpm test
 pnpm test:db
+pnpm test:e2e
 ```
 
-`pnpm test` typechecks in the commit hook as well. `pnpm test:db` needs Docker. Run it before merging a change to the commerce migration. It checks that browser roles cannot read orders and that the webhook role cannot read a health table.
+`pnpm test` also runs in the commit hook (with typecheck). `pnpm test:db` needs Docker; run it before merging a commerce migration.

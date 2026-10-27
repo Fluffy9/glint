@@ -36,8 +36,8 @@ export const en = {
   },
   hero: {
     title: "A band with no screen.",
-    lede: "You wear it. Heart rate, sleep, and movement stay in your browser first, and only leave if you choose to back them up.",
-    priceNote: "planned {amount} usd once",
+    lede: "Heart rate, sleep, and movement stay in your browser first, and only leave if you choose to back them up.",
+    priceNote: "TBD {amount} USD",
   },
   features: {
     heading: "Fitness tracking that just works",
@@ -46,42 +46,42 @@ export const en = {
       {
         id: "no-bs",
         title: "No BS",
-        body: "Plain language about what the band stores and what leaves this browser. No ads, no streaks nagging you.",
+        body: "No ads, no streaks, no leaderboards, no monthly subscriptions.",
       },
       {
         id: "screenless",
         title: "No screen",
-        body: "Nothing on your wrist to check mid-run. You look when you want to.",
+        body: "It's low-key. It does one thing well, tracking your fitness.  Not a replacement for your watch or your phone.",
       },
       {
         id: "offline",
         title: "Local first",
-        body: "Your data lives in this browser and works without a connection. Backup is optional, and you can skip it.",
+        body: "Made with an offline-first mentality. Data stays on your device, and in your browser, and in the cloud only optionally.",
       },
       {
         id: "no-account",
         title: "No account",
-        body: "The dashboard is free. It lives in this browser, with no sign-in.",
+        body: "The dashboard is free. No sign-in necessary.",
       },
       {
         id: "lock",
         title: "Encrypted backup",
-        body: "This browser encrypts a copy, then backup uploads ciphertext only.",
+        body: "Data is encrypted locally in your browser. Keys never leave your device.",
       },
       {
         id: "not-for-sale",
         title: "Never sold",
-        body: "Your heart rate is not a product, a feed, or an ad target.",
+        body: "There is no data held to be sold, and even if there was we wouldn't do it.",
       },
       {
         id: "export",
         title: "Export anytime",
-        body: "Take a plain CSV or JSON copy of your data whenever you want. Coming soon: send it straight to Google Drive.",
+        body: "Export however you'd like. Upload to Google Drive, or take a plain CSV or JSON copy of your data.",
       },
       {
         id: "trash",
         title: "Delete anytime",
-        body: "Wipe this browser whenever you want. A new payment does not unwrap old ciphertext.",
+        body: "No logs retained, data is truly deleted on request.",
       },
     ],
   },
@@ -95,7 +95,7 @@ export const en = {
     openPage: "Open the {competitor} page.",
     pricingLink: "{name} pricing.",
     glintOnce: "{bandPrice} once (planned)",
-    glintKeep: "Optional encrypted backup, {backupPrice} a year. The band keeps working without it.",
+    glintKeep: "Optional encrypted backup for {backupPrice} a year.",
     glintScreen: "None. You read it in your browser.",
     glintBattery: "To be announced.",
     glintRecord: "In your browser first. A copy leaves only if you turn on backup. No feed.",
@@ -201,7 +201,7 @@ export const en = {
         answer: [
           "The planned price is {bandPrice} once for the band. ",
           { href: "/pricing", label: "See pricing" },
-          " for the full bill.",
+          ".",
         ],
       },
       {
@@ -211,19 +211,19 @@ export const en = {
       {
         question: "Why is there no screen?",
         answer: [
-          "So your wrist stays quiet. Heart rate, sleep, and movement land in your browser. You look when you want to.",
+          "Minimalism. ",
         ],
       },
       {
         question: "What does local first mean?",
         answer: [
-          "Your data is stored in this browser. Nothing leaves this browser unless you turn on backup or export a file yourself.",
+          "The data stays on your device. It is only accessible by connecting to your browser via phone/tablet/pc/etc. It does not sync to a cloud unless you want it to. It can continue to work even without internet access.",
         ],
       },
       {
         question: "Where does my data live?",
         answer: [
-          "In this browser. This browser encrypts a copy, then backup uploads ciphertext only. ",
+          "On your device, and in your browser, and optionally in the cloud. Your browser encrypts a copy, then backup uploads ciphertext only. ",
           { href: "/privacy", label: "Privacy" },
           " has the longer version.",
         ],
@@ -231,24 +231,24 @@ export const en = {
       {
         question: "What if I lose my recovery key?",
         answer: [
-          "There is no account. If you cannot open the vault, the backup stays locked. A new payment does not unwrap old ciphertext.",
+          "It becomes unrecoverable. You can create a new recovery key for new data, but the old one is lost.",
         ],
       },
       {
         question: "What happens to my backup if I stop paying?",
         // CONFIRM: pick the real retention period before launch.
         answer: [
-          "The band keeps working. Uploads stop when the year ends. The locked copies stay locked. A new payment does not unwrap them.",
+          "Backups are deleted after 30 days with no renewal.",
         ],
       },
       {
         question: "Do you sell my data?",
-        answer: ["No. We do not sell your data. We also cannot read your backup."],
+        answer: ["No. We do not sell your data. We also cannot read your data."],
       },
       {
         question: "Can I export or delete my data?",
         answer: [
-          "Export a plain CSV or JSON anytime. Wipe this browser from the ",
+          "Export at anytime in your ",
           { href: "/dashboard", label: "dashboard" },
           ". There is no account.",
         ],
@@ -266,10 +266,10 @@ export const en = {
     kicker: "Hardware",
     product: "{name}",
     once: "once",
-    lede: "You buy the band once. Reading it in the dashboard costs nothing. Backup is a separate year, and you can skip it.",
+    lede: "You buy the band. Accessing the dashboard costs nothing. Backup is a separate yearly fee and is optional.",
     dashboard: "Dashboard",
     free: "Free",
-    dashboardBody: "Open your data in this browser. No account and no subscription.",
+    dashboardBody: "Access your data in this browser. No account and no subscription.",
     band: "The band",
     bandBody: "Once, at the planned launch price. The band works with no subscription.",
     backup: "Backup",

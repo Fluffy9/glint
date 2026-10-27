@@ -37,4 +37,11 @@ describe("backup function client", () => {
     expect(result.objects).toHaveLength(1);
     expect(JSON.parse(String(fetchImpl.mock.calls[0]?.[1]?.body))).toEqual({ vaultId: "vault-a" });
   });
+
+  it("includes the HTTP status when the shelf request fails", async () => {
+    const fetchImpl = vi.fn(async () => new Response("Internal Server Error", { status: 500 }));
+    await expect(downloadBackup(fetchImpl, "/downloadBackup", "vault-a")).rejects.toThrow(
+      "backup request failed (500)",
+    );
+  });
 });

@@ -1,41 +1,68 @@
+![](docs/readme/sparkle.svg)
+
 # Glint
 
-Glint is a screenless fitness band. You buy it once. Heart rate, sleep, and movement stay in your browser first. Optional encrypted backup is the only paid cloud piece, and the band keeps working if you skip it.
+**A band with no screen.**  
+Heart rate, sleep, and movement stay in your browser first,  
+and only leave if you choose to back them up.
 
-This repository is the marketing site, the browser vault on `/dashboard`, Stripe checkout records, and the Cloud Functions that store ciphertext. It is not a cloud fitness account.
+[Live site](https://fluffy9.github.io/glint/) · [Dashboard](https://fluffy9.github.io/glint/dashboard) · Security · Health data
 
-Planned prices: **$69.99** for the band once, **$10** a year for backup. Checkout is Stripe Payment Links. Amounts on the page come from Stripe when configured, otherwise from fallbacks in `lib/prices.ts`.
+  
+
+
+![Glint marketing hero: a band with no screen, beside the lavender packaging box](docs/readme/hero.png)
+
+## Why?
+
+I wanted to buy a fitness tracker without a screen and felt there weren't enough privacy friendly options. I started to vibe code something and this is where we are so far. 
+
+
+## Packaging
+
+WIP mockups
+
+![Work-in-progress Glint packaging box, turning smoothly left and right](docs/readme/packaging.gif)
+
+![Lavender packaging](docs/readme/packaging-lavender.png)   ![Mint packaging](docs/readme/packaging-mint.png)   ![Peach packaging](docs/readme/packaging-peach.png)   ![Sky packaging](docs/readme/packaging-sky.png)
+
+Lavender · Mint · Peach · Sky
+
+## Features
+
+
+|                                           |                                                                                                                                         |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| ![](docs/readme/feature-no-bs.svg)        | **No BS** No ads, no streaks, no leaderboards, no monthly subscriptions.                                                                |
+| ![](docs/readme/feature-screenless.svg)   | **No screen** It's low-key. It does one thing well, tracking your fitness. Not a replacement for your watch or your phone.              |
+| ![](docs/readme/feature-offline.svg)      | **Local first** Made with an offline-first mentality. Data stays on your device, and in your browser, and in the cloud only optionally. |
+| ![](docs/readme/feature-no-account.svg)   | **No account** The dashboard is free. No sign-in necessary.                                                                             |
+| ![](docs/readme/feature-lock.svg)         | **Encrypted backup** Data is encrypted locally in your browser. Keys never leave your device.                                           |
+| ![](docs/readme/feature-not-for-sale.svg) | **Never sold** There is no data held to be sold, and even if there was we wouldn't do it.                                               |
+| ![](docs/readme/feature-export.svg)       | **Export anytime** Export however you'd like. Upload to Google Drive, or take a plain CSV or JSON copy of your data.                    |
+| ![](docs/readme/feature-trash.svg)        | **Delete anytime** No logs retained, data is truly deleted on request.                                                                  |
+
+
+
 
 ## How it works
 
+![Band to browser vault over Bluetooth, then optional paid ciphertext backup](docs/readme/how-it-works.svg)
+
+## Repository
+
 ```text
-Band (Web Bluetooth) ──► browser encrypts samples ──► IndexedDB vault
-                                                         │
-                              paid backup (optional) ────┘
-                                                         ▼
-                                              Firebase Storage (ciphertext only)
+glint/
+├── app/                 Next.js routes (home, pricing, dashboard, …)
+├── components/          Site UI, packaging box, dashboard
+├── content/             Copy and site constants
+├── design-system/       Tokens, components, brand + feature art
+├── docs/                Security, health data, README art
+├── functions/           Stripe webhook + backup API
+├── lib/                 Vault, passkeys, band, commerce helpers
+├── packaging/           Box mock source
+└── scripts/             Seeds, README art export
 ```
-
-There is **no sign-in and no Firebase Auth user**. A vault is local:
-
-1. The browser creates a data key and wraps it with a passkey (WebAuthn PRF) and a one-time recovery key.
-2. `localStorage` only records that a vault exists so the first paint can show Create or Unlock. IndexedDB holds the wraps and sample ciphertext.
-3. Unlock is passkey or pasted recovery key. A new Stripe payment does not unwrap old ciphertext.
-4. If backup is paid, the browser redeems a short-lived upload capability from the paid checkout (email + `vaultId`). Cloud Functions check that capability and `paidUntil`, then write blobs the client cannot overwrite. The server never sees the data key or plaintext samples.
-
-Details: [docs/health-data.md](docs/health-data.md) and [docs/security.md](docs/security.md).
-
-## Repository map
-
-| Area | Role |
-| --- | --- |
-| `app/`, `components/`, `content/` | Next.js site (landing, pricing, compare, privacy, security, dashboard) |
-| `lib/vault-*.ts`, `lib/passkey.ts`, `lib/band.ts` | Local vault, passkeys, band / fixture source |
-| `functions/` | Stripe webhook, redeem / upload / download / delete backup, renewal jobs |
-| `firestore.rules`, `storage.rules` | Clients cannot write orders or backup objects |
-| `docs/` | Health destinations and security controls |
-
-Dev-only dashboard fixtures and page screenshots load only when `NODE_ENV === "development"`. They are not part of production builds.
 
 ## Run
 
@@ -50,7 +77,7 @@ Checkout stays off until `NEXT_PUBLIC_STRIPE_LINK_BAND` and `NEXT_PUBLIC_STRIPE_
 
 ### Local backup (emulators)
 
-With no Firebase keys in `.env`, `/dashboard` talks to Firebase emulators through `/__glint/*`. Java 21+ is required.
+With no cloud keys in `.env`, `/dashboard` talks to local emulators through `/__glint/*`. Java 21+ is required.
 
 ```sh
 pnpm emulators
@@ -69,14 +96,22 @@ Open `http://localhost:3000/dashboard` (or `127.0.0.1`) and stay on that host. C
 stripe listen --forward-to http://127.0.0.1:5001/glint-local/us-central1/stripeWebhook
 ```
 
-`COMMERCE_DATABASE_URL` is only for the older Supabase commerce schema test. Apply [supabase/migrations/20261026000000_commerce.sql](supabase/migrations/20261026000000_commerce.sql) before `pnpm test:db`. Live purchases land in Firestore.
+
 
 ## Tests
 
 ```sh
 pnpm test
-pnpm test:db
 pnpm test:e2e
 ```
 
-`pnpm test` also runs in the commit hook (with typecheck). `pnpm test:db` needs Docker; run it before merging a commerce migration.
+`pnpm test` also runs in the commit hook (with typecheck).
+
+## README art
+
+```sh
+pnpm dev
+pnpm export:readme
+```
+
+Assets land in `[docs/readme/](docs/readme/)`.

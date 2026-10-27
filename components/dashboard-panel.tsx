@@ -26,6 +26,7 @@ import { createPasskey, unlockPasskey } from "@/lib/passkey";
 import { readLocalVault, writeLocalVault, type LocalVault } from "@/lib/vault-db";
 import { VAULT_FLAG_EVENT, readVaultFlag, writeVaultFlag } from "@/lib/vault-flag";
 import { mergeRestoredVault } from "@/lib/vault-restore";
+import { formatSampleTime } from "@/lib/format-sample-time";
 import { storeBandBytes } from "@/lib/vault-samples";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -125,6 +126,9 @@ export function DashboardPanel({
           return;
         }
         if (!vault.capability) {
+          // Local-only vaults have nothing to pull; probing the shelf only
+          // makes sense after a paid backup year is on the vault.
+          if (!vault.paidUntil) return;
           try {
             const remote = await downloadBackup(browserFetch(), functionUrl(targets, "downloadBackup"), vaultId);
             const header = remote.objects.filter((item) => item.category === "header").at(-1);
@@ -146,7 +150,7 @@ export function DashboardPanel({
             await writeLocalVault(next);
             setVault(next);
           } catch {
-            return;
+            if (!cancel) setError(copy.dashboard.backupFailed);
           }
           return;
         }
@@ -400,7 +404,7 @@ export function DashboardPanel({
             <ul className="dashboard-samples">
               {vault.samples.map((sample) => (
                 <li key={sample.id}>
-                  {copy.dashboard.sample} {sample.recordedAt}
+                  {copy.dashboard.sample} {formatSampleTime(sample.recordedAt)}
                 </li>
               ))}
             </ul>

@@ -3,7 +3,8 @@
 import {
   createContext,
   useContext,
-  useEffect,
+  useLayoutEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -14,6 +15,7 @@ import {
   defaultMode,
   themeAttribute,
 } from "@/lib/appearance";
+import { readAppearance, saveAppearance } from "@/lib/appearance-store";
 
 type Appearance = {
   band: BandColor;
@@ -24,12 +26,35 @@ type Appearance = {
 
 const AppearanceContext = createContext<Appearance | null>(null);
 
-export function AppearanceProvider({ children }: { children: ReactNode }) {
-  const [band, setBand] = useState<BandColor>(defaultBand);
-  const [mode, setMode] = useState<AppearanceMode>(defaultMode);
+function applyAppearance(band: BandColor, mode: AppearanceMode) {
+  saveAppearance({ band, mode });
+  document.documentElement.setAttribute("data-theme", themeAttribute(band, mode));
+}
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", themeAttribute(band, mode));
+export function AppearanceProvider({
+  children,
+  initialBand = defaultBand,
+  initialMode = defaultMode,
+}: {
+  children: ReactNode;
+  initialBand?: BandColor;
+  initialMode?: AppearanceMode;
+}) {
+  const [band, setBand] = useState(initialBand);
+  const [mode, setMode] = useState(initialMode);
+  const synced = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!synced.current) {
+      synced.current = true;
+      const stored = readAppearance(localStorage);
+      if (stored && (stored.band !== band || stored.mode !== mode)) {
+        setBand(stored.band);
+        setMode(stored.mode);
+        return;
+      }
+    }
+    applyAppearance(band, mode);
   }, [band, mode]);
 
   return (

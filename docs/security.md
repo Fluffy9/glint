@@ -11,15 +11,11 @@ Controls are either enforced by a test or marked as a human gate. Add a control 
 | Backup turns on only from Payment Link metadata `backup=true`. | Payment link metadata test |
 | Security headers, including a script policy with no open source and no framing. HSTS is production-only. | Browser headers test |
 | Client components cannot see server secrets. `NEXT_PUBLIC_` names must be listed in `lib/public-env.ts`. | Secrets stay on the server test |
-| Commerce tables force row-level security. `commerce_ingest` is the only role with a policy. There are no health columns. | Commerce schema test |
-| The browser roles cannot read orders. `commerce_ingest` can write an order and cannot read `health`. | Commerce role test, `pnpm test:db` |
-| The webhook path does not import health storage. | Commerce schema test |
+| The webhook path does not import health storage. | Webhook isolation test |
 | One data key encrypts samples. Passkey output and the recovery key wrap that key. The stored record does not hold those secrets in the clear. | Vault key wrapping test |
 | Storage rules deny client reads and writes. Upload goes through a function that checks the capability hash and `paidUntil`. | Firebase rules test |
 | There is no Firebase Auth user. A paid checkout binds one vault id to the Stripe email. | Upload capability test |
 | The public security page does not claim HIPAA, SOC 2, or military-grade protection. | Public claims test |
-
-`pnpm test` runs every test except the database one. Run `pnpm test:db` before merging a migration. It needs Docker.
 
 ## Human gates before health data is stored
 

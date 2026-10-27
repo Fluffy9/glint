@@ -20,7 +20,7 @@ async function postJson<T>(fetchImpl: FetchLike, url: string, body: unknown): Pr
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  if (!response.ok) throw new Error("backup request failed");
+  if (!response.ok) throw new Error(`backup request failed (${response.status})`);
   return (await response.json()) as T;
 }
 

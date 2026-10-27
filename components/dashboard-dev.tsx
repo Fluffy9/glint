@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   base64ToBytes,
   bytesToBase64,
@@ -212,20 +212,27 @@ export function DashboardDev({ open, vault, dataKey, onVault, onNote }: Props) {
 
   async function refreshStatus() {
     const stored = await readLocalVault();
+    const current = vault ?? stored;
     const flag = localStorage.getItem("glint-vault") === "1";
     note(
       [
         `flag=${flag}`,
         `open=${open}`,
-        `vaultId=${stored?.record.vaultId ?? "none"}`,
-        `passkeys=${stored?.record.passkeys.length ?? 0}`,
-        `samples=${stored?.samples.length ?? 0}`,
-        `capability=${stored?.capability ? "yes" : "no"}`,
-        `paidUntil=${stored?.paidUntil ?? "none"}`,
+        `vaultId=${current?.record.vaultId ?? "none"}`,
+        `passkeys=${current?.record.passkeys.length ?? 0}`,
+        `samples=${current?.samples.length ?? 0}`,
+        `capability=${current?.capability ? "yes" : "no"}`,
+        `paidUntil=${current?.paidUntil ?? "none"}`,
         `fixtureBand=${useFixtureBand}`,
       ].join("\n"),
     );
   }
+
+  useEffect(() => {
+    if (!log.startsWith("flag=")) return;
+    void refreshStatus();
+    // Keep a visible Status dump aligned with the open vault after connect/inject.
+  }, [vault, open, useFixtureBand]);
 
   return (
     <section className="dashboard-dev paint-skip" data-dev-chrome aria-label="Dashboard dev tools">

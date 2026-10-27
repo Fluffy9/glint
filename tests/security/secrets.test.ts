@@ -5,7 +5,7 @@ import { publicEnvNames } from "../../lib/public-env";
 
 const roots = ["app", "components", "lib", "proxy.ts"];
 const secretPattern = /sk_live_[A-Za-z0-9]+|sk_test_[A-Za-z0-9]+|whsec_[A-Za-z0-9]+/;
-const serverOnly = /SUPABASE_SERVICE_ROLE|STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|COMMERCE_DATABASE_URL/;
+const serverOnly = /STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET/;
 
 function filesIn(entry: string): string[] {
   const full = path.join(process.cwd(), entry);

@@ -52,6 +52,24 @@ test("darkens the hero copy and leaves the box colour alone", async ({ page }) =
   expect(wash).toContain("0.36");
 });
 
+test("keeps dark mode after a reload", async ({ page }) => {
+  await open(page);
+  await page.locator("button.nav-mode:visible").click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "lavender-dark");
+
+  const cookie = await page.evaluate(() => document.cookie);
+  expect(cookie).toContain("glint-appearance");
+
+  const response = await page.reload();
+  const html = (await response?.text()) ?? "";
+  expect(html).toMatch(/data-theme="lavender-dark"/);
+  expect(html).toContain("glint-appearance");
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "lavender-dark");
+  await appReady(page);
+  await expect(page.locator("button.nav-mode:visible")).toHaveAttribute("aria-pressed", "true");
+});
+
 test("turns the packaging box when it is dragged", async ({ page }) => {
   await open(page);
   const stage = page.locator(".home-hero-stage:visible");

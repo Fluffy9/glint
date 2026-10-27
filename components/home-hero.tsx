@@ -84,6 +84,7 @@ export function HomeHero({ priceNote }: Props) {
         <button
           type="button"
           className="home-hero-dev-toggle"
+          data-dev-chrome
           aria-pressed={devOpen}
           onClick={() => setDevOpen((open) => !open)}
         >
@@ -91,14 +92,16 @@ export function HomeHero({ priceNote }: Props) {
         </button>
       ) : null}
       {isDev && devOpen ? (
-        <PackagingDev
-          slide={slide}
-          pat={pat}
-          mm={mm}
-          onSlide={setSlide}
-          onPat={setPat}
-          onMm={setMm}
-        />
+        <div data-dev-chrome>
+          <PackagingDev
+            slide={slide}
+            pat={pat}
+            mm={mm}
+            onSlide={setSlide}
+            onPat={setPat}
+            onMm={setMm}
+          />
+        </div>
       ) : null}
     </section>
   );

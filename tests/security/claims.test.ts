@@ -17,7 +17,8 @@ describe("Public claims", () => {
     }
     expect(catalog).toContain("Stripe");
     expect(catalog.toLowerCase()).toContain("ciphertext");
-    expect(catalog.toLowerCase()).toContain("password");
+    expect(catalog.toLowerCase()).toContain("no account");
+    expect(catalog.toLowerCase()).toContain("does not unwrap");
     expect(catalog.toLowerCase()).not.toContain("in your account");
   });
 });

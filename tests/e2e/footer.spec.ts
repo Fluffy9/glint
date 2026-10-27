@@ -7,8 +7,7 @@ const groups = [
     links: [
       ["Home", "/"],
       ["Pricing", "/pricing"],
-      ["Sign in", "/login"],
-      ["Account", "/account"],
+      ["Dashboard", "/dashboard"],
     ],
   },
   {

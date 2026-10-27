@@ -3,8 +3,6 @@ export const DAY_MS = 24 * 60 * 60 * 1000;
 export const GRACE_DAYS = 30;
 export const RENEWAL_LEAD_DAYS = 30;
 export const KEY_VERSION = 1;
-export const DELETE_CONFIRM = "DELETE";
-export const DELETE_STEPS = ["storage", "objects", "entitlement", "auth"] as const;
 
 export type Order = {
   sessionId: string;
@@ -20,12 +18,13 @@ export type Entitlement = {
   email: string;
   paidUntil: Date;
   stripeCustomerId: string | null;
-  uid: string | null;
+  vaultId: string | null;
+  capabilityHash: string | null;
 };
 
 export type ObjectDoc = {
   id: string;
-  uid: string;
+  vaultId: string;
   category: string;
   nonce: string;
   keyVersion: number;
@@ -37,11 +36,10 @@ export type BackupState = {
   entitlements: Entitlement[];
   objects: ObjectDoc[];
   blobs: Record<string, Uint8Array>;
-  users: string[];
 };
 
 export function emptyBackupState(): BackupState {
-  return { orders: [], entitlements: [], objects: [], blobs: {}, users: [] };
+  return { orders: [], entitlements: [], objects: [], blobs: {} };
 }
 
 export function normalizeEmail(email: string): string {
@@ -95,42 +93,109 @@ export function applyPaidSession(state: BackupState, session: PaidSession): Back
     email,
     paidUntil: extendPaidUntil(existing?.paidUntil ?? null, session.paidAt),
     stripeCustomerId: session.customerId ?? existing?.stripeCustomerId ?? null,
-    uid: existing?.uid ?? null,
+    vaultId: existing?.vaultId ?? null,
+    capabilityHash: existing?.capabilityHash ?? null,
   };
 
   return {
     ...state,
     orders,
-    entitlements: [
-      ...state.entitlements.filter((item) => normalizeEmail(item.email) !== email),
-      next,
-    ],
+    entitlements: [...state.entitlements.filter((item) => normalizeEmail(item.email) !== email), next],
   };
 }
 
-export function claimEntitlement(state: BackupState, uid: string, email: string): BackupState {
-  const key = normalizeEmail(email);
+export type RedeemResult =
+  | { ok: true; state: BackupState; paidUntil: Date }
+  | { ok: false; error: "unpaid" | "taken" | "expired" };
+
+export function redeemPaidCheckout(
+  state: BackupState,
+  input: { sessionId: string; vaultId: string; capabilityHash: string; now: Date },
+): RedeemResult {
+  const order = state.orders.find((item) => item.sessionId === input.sessionId && item.backup && item.email);
+  if (!order?.email) return { ok: false, error: "unpaid" };
+  const email = normalizeEmail(order.email);
+  const entitlement = state.entitlements.find((item) => normalizeEmail(item.email) === email) ?? null;
+  if (!entitlement || entitlement.paidUntil.getTime() <= input.now.getTime()) return { ok: false, error: "expired" };
+  if (entitlement.vaultId && entitlement.vaultId !== input.vaultId) return { ok: false, error: "taken" };
+  const next: Entitlement = { ...entitlement, vaultId: input.vaultId, capabilityHash: input.capabilityHash };
   return {
-    ...state,
-    users: state.users.includes(uid) ? state.users : [...state.users, uid],
-    entitlements: state.entitlements.map((item) =>
-      normalizeEmail(item.email) === key ? { ...item, uid, email: key } : item,
-    ),
+    ok: true,
+    paidUntil: next.paidUntil,
+    state: {
+      ...state,
+      entitlements: state.entitlements.map((item) => (normalizeEmail(item.email) === email ? next : item)),
+    },
   };
 }
 
-export function entitlementForUid(state: BackupState, uid: string): Entitlement | null {
-  return state.entitlements.find((item) => item.uid === uid) ?? null;
+export function entitlementForVault(state: BackupState, vaultId: string): Entitlement | null {
+  return state.entitlements.find((item) => item.vaultId === vaultId) ?? null;
 }
 
-export function canAccessBackup(input: {
-  authUid: string | null;
-  ownerUid: string;
-  paidUntil: Date | null;
+export function sameSecret(left: string, right: string): boolean {
+  if (left.length !== right.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < left.length; index += 1) mismatch |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  return mismatch === 0;
+}
+
+export function canUploadBackup(input: {
+  entitlement: Entitlement | null;
+  vaultId: string;
+  capabilityHash: string;
   now: Date;
 }): boolean {
-  if (!input.authUid || input.authUid !== input.ownerUid || !input.paidUntil) return false;
-  return input.paidUntil.getTime() > input.now.getTime();
+  if (!input.entitlement?.capabilityHash || input.entitlement.vaultId !== input.vaultId) return false;
+  if (input.entitlement.paidUntil.getTime() <= input.now.getTime()) return false;
+  return sameSecret(input.entitlement.capabilityHash, input.capabilityHash);
+}
+
+export function canDeleteShelf(input: {
+  entitlement: Entitlement | null;
+  vaultId: string;
+  capabilityHash: string;
+}): boolean {
+  if (!input.entitlement?.capabilityHash || input.entitlement.vaultId !== input.vaultId) return false;
+  return sameSecret(input.entitlement.capabilityHash, input.capabilityHash);
+}
+
+export function canDownloadBackup(input: { entitlement: Entitlement | null; vaultId: string; now: Date }): boolean {
+  if (!input.entitlement || input.entitlement.vaultId !== input.vaultId) return false;
+  return input.entitlement.paidUntil.getTime() > input.now.getTime();
+}
+
+export function backupObjectPath(vaultId: string, category: string, objectId: string): string {
+  return `backups/${vaultId}/${category}/${objectId}`;
+}
+
+export function addCiphertext(
+  state: BackupState,
+  object: ObjectDoc,
+  bytes: Uint8Array,
+): BackupState | null {
+  const path = backupObjectPath(object.vaultId, object.category, object.id);
+  if (state.blobs[path] || state.objects.some((item) => item.vaultId === object.vaultId && item.id === object.id)) {
+    return null;
+  }
+  return {
+    ...state,
+    objects: [...state.objects, object],
+    blobs: { ...state.blobs, [path]: bytes },
+  };
+}
+
+export function deleteShelf(state: BackupState, vaultId: string): BackupState {
+  const prefix = `backups/${vaultId}/`;
+  const blobs: Record<string, Uint8Array> = {};
+  for (const [key, value] of Object.entries(state.blobs)) {
+    if (!key.startsWith(prefix)) blobs[key] = value;
+  }
+  return {
+    ...state,
+    blobs,
+    objects: state.objects.filter((item) => item.vaultId !== vaultId),
+  };
 }
 
 export function renewalDue(paidUntil: Date, now: Date): boolean {
@@ -143,62 +208,9 @@ export function expiryDue(paidUntil: Date, now: Date): boolean {
 }
 
 export function renewalTargets(state: BackupState, now: Date): Entitlement[] {
-  return state.entitlements.filter((item) => item.uid && renewalDue(item.paidUntil, now));
+  return state.entitlements.filter((item) => renewalDue(item.paidUntil, now));
 }
 
 export function expiryTargets(state: BackupState, now: Date): Entitlement[] {
   return state.entitlements.filter((item) => expiryDue(item.paidUntil, now));
-}
-
-export function expireEntitlement(state: BackupState, uid: string): BackupState {
-  const prefix = `backups/${uid}/`;
-  const blobs: Record<string, Uint8Array> = {};
-  for (const [key, value] of Object.entries(state.blobs)) {
-    if (!key.startsWith(prefix)) blobs[key] = value;
-  }
-  return {
-    ...state,
-    blobs,
-    objects: state.objects.filter((item) => item.uid !== uid),
-    entitlements: state.entitlements.filter((item) => item.uid !== uid),
-  };
-}
-
-export function deleteAccount(state: BackupState, uid: string): BackupState {
-  const removed = state.entitlements.find((item) => item.uid === uid) ?? null;
-  const expired = expireEntitlement(state, uid);
-  return {
-    ...expired,
-    entitlements: expired.entitlements.filter(
-      (item) => !(removed && !item.uid && normalizeEmail(item.email) === normalizeEmail(removed.email)),
-    ),
-    users: state.users.filter((id) => id !== uid),
-  };
-}
-
-export async function runDeleteAccount(
-  uid: string,
-  steps: {
-    storage: (uid: string) => Promise<void>;
-    objects: (uid: string) => Promise<void>;
-    entitlement: (uid: string) => Promise<void>;
-    auth: (uid: string) => Promise<void>;
-  },
-): Promise<void> {
-  await steps.storage(uid);
-  await steps.objects(uid);
-  await steps.entitlement(uid);
-  await steps.auth(uid);
-}
-
-export function canSendSignIn(configured: boolean, email: string): boolean {
-  return configured && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-}
-
-export function canDeleteAccount(configured: boolean, signedIn: boolean, phrase: string): boolean {
-  return configured && signedIn && phrase === DELETE_CONFIRM;
-}
-
-export function backupObjectPath(uid: string, category: string, objectId: string): string {
-  return `backups/${uid}/${category}/${objectId}`;
 }

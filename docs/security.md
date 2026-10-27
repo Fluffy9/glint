@@ -14,9 +14,9 @@ Controls are either enforced by a test or marked as a human gate. Add a control 
 | Commerce tables force row-level security. `commerce_ingest` is the only role with a policy. There are no health columns. | Commerce schema test |
 | The browser roles cannot read orders. `commerce_ingest` can write an order and cannot read `health`. | Commerce role test, `pnpm test:db` |
 | The webhook path does not import health storage. | Commerce schema test |
-| Account delete removes storage, object docs, and the auth user, in that order, and leaves the Stripe order. | Account delete test |
-| Backup blobs are ciphertext. The passphrase is not stored next to them. | Passphrase backup crypto test |
-| Storage rules require the signed-in owner and a future `paidUntil`. | Firebase rules test |
+| One data key encrypts samples. Passkey output and the recovery key wrap that key. The stored record does not hold those secrets in the clear. | Vault key wrapping test |
+| Storage rules deny client reads and writes. Upload goes through a function that checks the capability hash and `paidUntil`. | Firebase rules test |
+| There is no Firebase Auth user. A paid checkout binds one vault id to the Stripe email. | Upload capability test |
 | The public security page does not claim HIPAA, SOC 2, or military-grade protection. | Public claims test |
 
 `pnpm test` runs every test except the database one. Run `pnpm test:db` before merging a migration. It needs Docker.
@@ -24,11 +24,11 @@ Controls are either enforced by a test or marked as a human gate. Add a control 
 ## Human gates before health data is stored
 
 - The Firebase project used in production is separate from local emulators. Stripe, Firebase, and GitHub logins use multi-factor authentication. There is no shared admin password.
-- Sign-in is an email link. The backup passphrase stays on the device. A password reset does not unwrap old ciphertext.
-- Backup is encrypted before upload. Passphrase material is never stored on the server. A key version is stored so a later rotation has a place to land.
-- Firebase Storage is private. Rules allow the signed-in owner only while backup is paid. Deleting the account removes ciphertext, object docs, and the sign-in. Stripe keeps the receipt.
-- Logs and error reports carry record ids, not sample bodies or tokens.
-- The phone app is confirmed as the only uploader, or the privacy page names the other recipient. See [health-data.md](health-data.md).
-- Counsel reviews the policy before real health data is stored, and before deletion is stated as a current fact. If readable health data or order email is exposed, tell the affected customers.
+- There is no account. A new payment does not unwrap old ciphertext. The recovery key is the only way onto a browser that does not already have a passkey for the vault.
+- Backup is encrypted before upload. The data key is never stored on the server. A key version is stored so a later rotation has a place to land.
+- Firebase Storage is private to Cloud Functions. A leaked capability can add blobs. It cannot rewrite an existing object.
+- Logs and error reports do not carry the recovery key, the capability, or sample bodies.
+- This browser encrypts, then backup uploads ciphertext. See [health-data.md](health-data.md).
+- Counsel reviews the policy before real health data is stored. If readable health data or order email is exposed, tell the affected customers.
 
 Dependabot, or the equivalent, turns on for this GitHub repository. A third-party penetration test is not part of this slice, and the security page does not imply one happened.

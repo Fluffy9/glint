@@ -1,55 +1,59 @@
 import { describe, expect, it } from "vitest";
 import { reviewPaint, screenMarks } from "./screen";
 
-const email = "buyer@example.com";
-const marks = screenMarks(email);
+const marks = screenMarks();
 
 describe("reviewPaint", () => {
-  it("accepts checking followed by the full signed-out screen", () => {
-    const report = reviewPaint([marks.checking, marks.out.slice(0, 2), marks.out], {
-      only: ["checking", "out"],
-      settle: "out",
+  it("accepts checking followed by the full create screen", () => {
+    const report = reviewPaint([marks.checking, marks.create.slice(0, 2), marks.create], {
+      only: ["checking", "create"],
+      settle: "create",
     });
     expect(report.ok).toBe(true);
   });
 
-  it("accepts checking followed by the full signed-in screen and rejects a signed-out frame", () => {
-    const clean = reviewPaint([marks.checking, marks.in], { only: ["checking", "in"], settle: "in" });
+  it("accepts checking followed by unlock and rejects a create frame", () => {
+    const clean = reviewPaint([marks.checking, marks.unlock], { only: ["checking", "unlock"], settle: "unlock" });
     expect(clean.ok).toBe(true);
 
-    const flashed = reviewPaint([marks.checking, ["header: Sign in"], marks.in], {
-      only: ["checking", "in"],
-      settle: "in",
+    const flashed = reviewPaint([marks.checking, ["panel: Create a passkey"], marks.unlock], {
+      only: ["checking", "unlock"],
+      settle: "unlock",
     });
     expect(flashed.violation).toBe(true);
-    expect(flashed.detail).toContain("signed out");
-    expect(flashed.detail).toContain("header: Sign in");
+    expect(flashed.detail).toContain("create");
+    expect(flashed.detail).toContain("panel: Create a passkey");
   });
 
-  it("rejects one frame that mixes two screens", () => {
-    const report = reviewPaint(
-      [["header: Sign in", "panel: Checking sign-in…", "panel: Signed in as buyer@example.com"]],
-      { only: ["checking", "out", "in"], settle: "in" },
-    );
+  it("settles on needs-recovery when the vault has no passkey", () => {
+    const report = reviewPaint([marks.checking, marks["needs-recovery"]], {
+      only: ["checking", "needs-recovery"],
+      settle: "needs-recovery",
+    });
+    expect(report.ok).toBe(true);
+  });
+
+  it("rejects one frame that mixes create and unlock", () => {
+    const report = reviewPaint([["panel: Create a passkey", "panel: Unlock"]], {
+      only: ["checking", "create", "unlock"],
+      settle: "unlock",
+    });
     expect(report.violation).toBe(true);
     expect(report.detail).toContain("Frame 0 is not one screen");
-    expect(report.detail).toContain("header: Sign in belongs on signed out");
-    expect(report.detail).toContain("panel: Checking sign-in… belongs on checking");
-    expect(report.detail).toContain("panel: Signed in as buyer@example.com belongs on signed in");
   });
 
   it("rejects a mark that is not on a screen", () => {
-    const report = reviewPaint([["panel: Surprise"]], { only: ["out"], settle: "out" });
+    const report = reviewPaint([["panel: Surprise"]], { only: ["create"], settle: "create" });
     expect(report.violation).toBe(true);
     expect(report.detail).toContain("panel: Surprise is not on any screen");
   });
 
   it("reports the gap when the last frame is only part of the settled screen", () => {
-    const report = reviewPaint([marks.checking], { only: ["checking", "out"], settle: "out" });
+    const report = reviewPaint([marks.checking], { only: ["checking", "create"], settle: "create" });
     expect(report.ok).toBe(false);
     expect(report.violation).toBe(false);
-    expect(report.detail).toContain("has not settled on signed out");
+    expect(report.detail).toContain("has not settled on create");
     expect(report.detail).toContain("missing:");
-    expect(report.detail).toContain("header: Sign in");
+    expect(report.detail).toContain("panel: Create a passkey");
   });
 });

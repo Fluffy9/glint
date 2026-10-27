@@ -12,16 +12,14 @@ import type { CompareRow, CompetitorSource } from "@/lib/competitors";
  */
 export const en = {
   meta: {
-    description: "{name} is a screenless fitness band that keeps your data on your phone first.",
+    description: "{name} is a screenless fitness band that keeps your data in your browser first.",
   },
   nav: {
     site: "Site",
     pricing: "Pricing",
     privacy: "Privacy",
     security: "Security",
-    signIn: "Sign in",
-    account: "Account",
-    signOut: "Sign out",
+    dashboard: "Dashboard",
     footer: "Footer",
     bandColour: "Band colour",
     switchMode: "Switch to {mode} mode",
@@ -38,7 +36,7 @@ export const en = {
   },
   hero: {
     title: "A band with no screen.",
-    lede: "You wear it. Heart rate, sleep, and movement live on your phone first, and only leave if you choose to back them up.",
+    lede: "You wear it. Heart rate, sleep, and movement stay in your browser first, and only leave if you choose to back them up.",
     priceNote: "planned {amount} usd once",
   },
   features: {
@@ -48,17 +46,17 @@ export const en = {
       {
         id: "no-bs",
         title: "No BS",
-        body: "Plain language about what the band stores and what leaves your phone. No ads, no streaks nagging you.",
+        body: "Plain language about what the band stores and what leaves this browser. No ads, no streaks nagging you.",
       },
       {
         id: "screenless",
         title: "No screen",
-        body: "Nothing on your wrist to check mid-run. You look at your phone when you want to.",
+        body: "Nothing on your wrist to check mid-run. You look when you want to.",
       },
       {
         id: "offline",
         title: "Local first",
-        body: "Your data lives on your phone and works without a connection. Backup is optional, and you can skip it.",
+        body: "Your data lives in this browser and works without a connection. Backup is optional, and you can skip it.",
       },
       {
         id: "battery",
@@ -68,7 +66,7 @@ export const en = {
       {
         id: "lock",
         title: "Encrypted backup",
-        body: "Backups are locked with a key made from your password before they leave your phone. We keep ciphertext only.",
+        body: "This browser encrypts a copy, then backup uploads ciphertext only.",
       },
       {
         id: "not-for-sale",
@@ -83,7 +81,7 @@ export const en = {
       {
         id: "trash",
         title: "Delete anytime",
-        body: "Delete the account and we delete the backup copies we hold.",
+        body: "Wipe this browser whenever you want. A new payment does not unwrap old ciphertext.",
       },
     ],
   },
@@ -98,9 +96,9 @@ export const en = {
     pricingLink: "{name} pricing.",
     glintOnce: "{bandPrice} once (planned)",
     glintKeep: "Optional encrypted backup, {backupPrice} a year. The band keeps working without it.",
-    glintScreen: "None. You read it on your phone.",
+    glintScreen: "None. You read it in your browser.",
     glintBattery: "To be announced.",
-    glintRecord: "On your phone first. A copy leaves only if you turn on backup. No feed.",
+    glintRecord: "In your browser first. A copy leaves only if you turn on backup. No feed.",
   },
   competitors: [
     {
@@ -169,7 +167,7 @@ export const en = {
       slug: "helio-strap",
       name: "Helio Strap",
       intro:
-        "The Amazfit Helio Strap is a screenless band at $99.99 once, with no subscription. Heart rate, sleep, and training load show up in the Zepp app. {name} is the same idea for less, and the record stays on your phone until you turn on backup.",
+        "The Amazfit Helio Strap is a screenless band at $99.99 once, with no subscription. Heart rate, sleep, and training load show up in the Zepp app. {name} is the same idea for less, and the record stays in your browser until you turn on backup.",
       rows: [
         { label: "Band", glint: "{bandPrice} once", theirs: "$99.99 once.", lean: "glint" },
         { label: "To keep it", glint: "{keep}", theirs: "No subscription. One payment.", lean: "even" },
@@ -213,34 +211,34 @@ export const en = {
       {
         question: "Why is there no screen?",
         answer: [
-          "So your wrist stays quiet. Heart rate, sleep, and movement land on your phone. You look when you want to.",
+          "So your wrist stays quiet. Heart rate, sleep, and movement land in your browser. You look when you want to.",
         ],
       },
       {
         question: "What does local first mean?",
         answer: [
-          "Your data is stored on your phone and the app works without a connection. Nothing leaves the phone unless you turn on backup or export a file yourself.",
+          "Your data is stored in this browser. Nothing leaves this browser unless you turn on backup or export a file yourself.",
         ],
       },
       {
         question: "Where does my data live?",
         answer: [
-          "On your phone. If you turn on backup, a copy is locked with a key made from your password before it leaves the phone, and we store ciphertext only. ",
+          "In this browser. This browser encrypts a copy, then backup uploads ciphertext only. ",
           { href: "/privacy", label: "Privacy" },
           " has the longer version.",
         ],
       },
       {
-        question: "What if I forget my password?",
+        question: "What if I lose my recovery key?",
         answer: [
-          "If you forget the password, the backup stays locked. We cannot unlock it. If you find the password, enter it and the backup opens again. Your phone copy is not affected, and you can export a plain copy first.",
+          "There is no account. If you cannot open the vault, the backup stays locked. A new payment does not unwrap old ciphertext.",
         ],
       },
       {
         question: "What happens to my backup if I stop paying?",
         // CONFIRM: pick the real retention period before launch.
         answer: [
-          "The band keeps working. We keep your backup for 30 days after it ends so you can export it, then we delete it.",
+          "The band keeps working. Uploads stop when the year ends. The locked copies stay locked. A new payment does not unwrap them.",
         ],
       },
       {
@@ -250,9 +248,9 @@ export const en = {
       {
         question: "Can I export or delete my data?",
         answer: [
-          "Export a plain CSV or JSON anytime. Signed in, you can delete the account and the backup copies we hold from the ",
-          { href: "/account", label: "account page" },
-          ".",
+          "Export a plain CSV or JSON anytime. Wipe this browser from the ",
+          { href: "/dashboard", label: "dashboard" },
+          ". There is no account.",
         ],
       },
     ],
@@ -269,7 +267,7 @@ export const en = {
     payBackup: "Add a year of backup,",
     checkoutOff: "Checkout is off until payments are configured.",
     backupBody: [
-      "Optional. One payment covers a year. We email you before it ends. Backup is locked with your password before it leaves your phone. The band still works if you skip it. ",
+      "Optional. One payment covers a year. We email you before it ends. This browser encrypts a copy, then backup uploads ciphertext only. The band still works if you skip it. ",
       { href: "/privacy", label: "How encryption works." },
     ],
   },
@@ -280,32 +278,24 @@ export const en = {
       {
         p: "This website takes payment through Stripe. We store the email on the order, whether you bought the band, and the date backup is paid through. We do not collect heart rate, sleep, or activity here in readable form.",
       },
-      { h: "On the phone" },
+      { h: "On this browser" },
       {
-        p: "{name} is local first. Tracking starts on your phone and works without a connection. A new phone does not have that copy until you restore it from backup or from an export.",
+        p: "{name} is local first. Samples stay in this browser. A new browser does not have that copy until you restore it.",
       },
       { h: "When backup is on" },
       {
-        p: "Backup is encrypted on your phone before it leaves. The key is made from your password. We store ciphertext only. We cannot read it, and another company cannot pull a readable copy from us.",
+        p: "This browser encrypts a copy, then backup uploads ciphertext only. We cannot read it, and another company cannot pull a readable copy from us.",
       },
       {
-        // CONFIRM: only keep the browser sentence if decryption really happens client-side
-        // and the password never reaches the server.
-        p: "To show charts on the website, your browser decrypts the copy with your password. The password stays in your browser and is not sent to us.",
-      },
-      { h: "If you reset your password" },
-      {
-        p: "You can reset your password and keep using {name}. Backups made with the old password stay locked. We cannot unlock them. If you find the old password, entering it opens them again. Your phone copy is not affected, and a plain export always works. Before you reset, export a plain copy if you want a way back.",
+        p: "There is no account. A new payment does not unwrap old ciphertext.",
       },
       { h: "Exports" },
       {
         p: "You can export a plain CSV or JSON anytime. That export is not encrypted. Treat it like any other file you own. Sending it straight to Google Drive is coming soon.",
       },
-      { h: "Other apps" },
-      { p: "An app on your phone can receive a category from the phone. The phone already has the samples." },
       { h: "Deleting your data" },
       {
-        p: "Turning a category off stops it from being backed up. Delete the account on the site and we delete the backup copies we hold. The phone copy stays on the phone until you delete it there.",
+        p: "Wipe this browser and that copy is gone from it. The locked copies we hold stay locked. There is no account.",
       },
       {
         p: ["We do not sell your data. ", { href: "/security", label: "Security" }, " lists what this site does today."],
@@ -326,69 +316,50 @@ export const en = {
       },
       { h: "When you back up with {name}" },
       {
-        p: "Backup is encrypted on your phone before it is uploaded, with a key made from your password. We store ciphertext only. A database backup does not reveal readable samples.",
+        p: "This browser encrypts a copy, then backup uploads ciphertext only. A database backup does not reveal readable samples.",
       },
       {
-        // CONFIRM: same condition as the Privacy page.
-        p: "Decryption for the website happens in your browser, and your password is not sent to us.",
+        p: "There is no account. A new payment does not unwrap old ciphertext.",
       },
       { h: "Known limits" },
       {
-        p: "You are trusting the app and this website to run the code we publish. We cannot unlock a backup for you, which also means that if the password is lost and there is no phone copy or export, that backup is gone. Resetting your password does not unlock old backups.",
+        p: "You are trusting this website to run the code we publish. If you cannot open the vault, that backup stays locked. A new payment does not unwrap old ciphertext.",
       },
       {
-        p: "Delete the account while signed in and we delete the backup copies we hold, then the sign-in. Stripe keeps the receipt. We still cannot read a backup.",
+        p: "Stripe keeps the receipt. We still cannot read a backup.",
       },
       { p: ["The same rules are written in plain language on ", { href: "/privacy", label: "Privacy" }, "."] },
     ],
   },
-  login: {
-    title: "Sign in",
-    description: "Sign in to a {name} account.",
-    body: "An account is where a backup lives after you choose to send a copy off the phone. We email you a sign-in link. There is no password for the account itself.",
-    pricing: "See pricing",
-  },
-  account: {
-    title: "Account",
-    description: "Sign in with an email link to manage backup.",
-    emailLabel: "Email",
-    sendLink: "Email me a sign-in link",
-    sent: "Check your email for the sign-in link.",
-    notConfigured: "Sign-in is not configured on this site yet.",
-    emulatorNote: "This browser is talking to the local emulators. No email is sent.",
-    openLink: "Open the sign-in link",
-    checking: "Checking sign-in…",
-    statusLabel: "Status",
-    signedIn: "Signed in as {email}",
-    backupNone: "No backup uploaded yet",
-    backupReady: "Ready for a test backup",
-    backupSaved: "Locked test backup on file",
-    testTitle: "Test backup",
-    testBody:
-      "Encrypt the sample text with a passphrase and upload the ciphertext. Then unlock it locally to prove the round trip.",
-    sampleLabel: "Sample text",
-    passphrase: "Backup passphrase",
-    saveBackup: "Save a test backup",
-    blobLockedLabel: "Encrypted upload",
-    blobUnlockedLabel: "Unlocked locally",
-    unlockPassphrase: "Passphrase",
-    unlockBackup: "Unlock locally",
-    unlockedTitle: "Unlocked locally",
-    unlockedBody: "This browser decrypted the downloaded ciphertext. The server never saw the passphrase.",
-    unlockFailed: "Could not unlock that backup. Check the passphrase.",
-    saveAnother: "Save another test backup",
-    deleteTitle: "Delete account",
-    deleteBody:
-      "This deletes the backup copies we hold and the sign-in. It does not delete the Stripe receipt. Your phone copy stays on the phone.",
-    confirmLabel: "Type DELETE to confirm",
-    deleteButton: "Delete account",
-    deleted: "The account is deleted.",
-    failed: "That did not work. Try the sign-in link again.",
-    sendFailed: "Could not send a sign-in link. Check that the local emulators are running.",
-    backupFailed: "Could not save the backup.",
-    backupFailedEmulator:
-      "Could not save the backup. Check that the local emulators are running (storage on 9199).",
-    deleteFailed: "Could not delete the account.",
+  dashboard: {
+    title: "Dashboard",
+    description: "Open the {name} vault on this browser.",
+    lede: "Samples stay on this browser until you choose backup.",
+    opening: "Opening dashboard…",
+    create: "Create a passkey",
+    haveRecovery: "I already have a recovery key",
+    saveWarning:
+      "Save this recovery key now. There is no reset. If it is lost, and you cannot open the vault another way, the locked samples stay locked. A new payment does not open them.",
+    copy: "Copy",
+    saved: "I saved this key",
+    continue: "Continue",
+    unlock: "Unlock",
+    pasteRecovery: "Paste recovery key",
+    recoveryLabel: "Recovery key",
+    recoveryBack: "Back",
+    addPasskey: "Add a passkey for this device",
+    skip: "Skip",
+    connect: "Connect the band",
+    connected: "Band connected",
+    sample: "Sample",
+    backup: "Backup",
+    paidThrough: "Paid through",
+    pay: "Pay for backup",
+    payOff: "Backup checkout is not configured.",
+    lock: "Lock",
+    noPasskey: "Use the recovery key on this device.",
+    failed: "That did not work.",
+    backupFailed: "Could not sync backup.",
   },
   checkout: {
     successTitle: "Order received",

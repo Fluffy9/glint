@@ -5,10 +5,10 @@ const questions = [
   ["How much does Glint cost?", "$69.99 once"],
   ["Is there a subscription?", "Optional encrypted backup is $10 a year"],
   ["Why is there no screen?", "So your wrist stays quiet"],
-  ["What does local first mean?", "stored on your phone"],
+  ["What does local first mean?", "stored in this browser"],
   ["Where does my data live?", "ciphertext only"],
-  ["What if I forget my password?", "the backup stays locked"],
-  ["What happens to my backup if I stop paying?", "30 days"],
+  ["What if I lose my recovery key?", "the backup stays locked"],
+  ["What happens to my backup if I stop paying?", "Uploads stop"],
   ["Do you sell my data?", "We also cannot read your backup"],
   ["Can I export or delete my data?", "CSV or JSON"],
 ] as const;

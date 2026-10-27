@@ -1,45 +1,30 @@
-import { copy, fill } from "@/content";
-import { TEST_BACKUP_PLAINTEXT } from "@/functions/src/domain/crypto";
+import { copy } from "@/content";
 
-export type Screen = "checking" | "out" | "in";
+export type Screen = "checking" | "create" | "unlock" | "needs-recovery";
 
 const screenName: Record<Screen, string> = {
   checking: "checking",
-  out: "signed out",
-  in: "signed in",
+  create: "create",
+  unlock: "unlock",
+  "needs-recovery": "needs recovery",
 };
 
-/** Every visible session mark, in reading order. A frame may be a subset of one screen. The settled frame must be the whole screen. */
-export function screenMarks(email: string): Record<Screen, string[]> {
-  const note = `panel: ${copy.account.emulatorNote}`;
+/** Every visible dashboard mark, in reading order. A frame may be a subset of one screen. The settled frame must be the whole screen. */
+export function screenMarks(): Record<Screen, string[]> {
+  const title = "title: Dashboard";
+  const lede = `lede: ${copy.dashboard.lede}`;
+  const header = "header: Dashboard";
+  const recovery = `panel: ${copy.dashboard.haveRecovery}`;
   return {
-    checking: ["header: Checking sign-in…", "panel: Checking sign-in…"],
-    out: [
-      "header: Sign in",
-      "title: Sign in",
-      `lede: ${copy.login.body}`,
-      `panel: ${copy.account.emailLabel}`,
-      `panel: ${copy.account.sendLink}`,
-      note,
-    ],
-    in: [
-      "header: Account",
-      "header: Sign out",
-      "title: Account",
-      `lede: ${copy.account.description}`,
-      `panel: ${copy.account.statusLabel}`,
-      `panel: ${fill(copy.account.signedIn, { email })}`,
-      `panel: ${copy.account.backupReady}`,
-      `panel: ${copy.account.testTitle}`,
-      `panel: ${copy.account.testBody}`,
-      `panel: ${copy.account.sampleLabel}`,
-      `panel: ${TEST_BACKUP_PLAINTEXT}`,
-      `panel: ${copy.account.passphrase}`,
-      `panel: ${copy.account.saveBackup}`,
-      `panel: ${copy.account.deleteTitle}`,
-      `panel: ${copy.account.deleteBody}`,
-      `panel: ${copy.account.confirmLabel}`,
-      note,
+    checking: [header, title, lede, "panel: Opening dashboard…"],
+    create: [header, title, lede, `panel: ${copy.dashboard.create}`, recovery],
+    unlock: [header, title, lede, `panel: ${copy.dashboard.unlock}`, recovery],
+    "needs-recovery": [
+      header,
+      title,
+      lede,
+      `panel: ${copy.dashboard.noPasskey}`,
+      `panel: ${copy.dashboard.pasteRecovery}`,
     ],
   };
 }
@@ -85,8 +70,8 @@ function formatList(marks: string[]): string {
   return lines.length ? lines.map((mark) => `    ${mark}`).join("\n") : "    (nothing)";
 }
 
-export function reviewPaint(frames: string[][], story: PaintStory, email = "buyer@example.com"): PaintReport {
-  const marks = screenMarks(email);
+export function reviewPaint(frames: string[][], story: PaintStory): PaintReport {
+  const marks = screenMarks();
   const slice = frames.slice(story.from ?? 0);
   const problems: string[] = [];
   let violation = false;

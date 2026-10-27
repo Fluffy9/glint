@@ -4,12 +4,12 @@ import { appReady } from "./ready";
 const features = [
   ["No BS", "Plain language about what the band stores"],
   ["No screen", "Nothing on your wrist to check mid-run"],
-  ["Local first", "lives on your phone"],
+  ["Local first", "lives in this browser"],
   ["Battery", "No screen to power"],
   ["Encrypted backup", "ciphertext only"],
   ["Never sold", "not a product, a feed, or an ad target"],
   ["Export anytime", "Google Drive"],
-  ["Delete anytime", "Delete the account"],
+  ["Delete anytime", "Wipe this browser"],
 ] as const;
 
 test("shows every feature card under fitness tracking", async ({ page }) => {

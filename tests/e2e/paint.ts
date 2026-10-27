@@ -22,7 +22,7 @@ export async function installPaintRecorder(page: Page) {
           const text = (node.textContent || "").replace(/\s+/g, " ").trim();
           const parent = node.parentElement;
           node = walker.nextNode();
-          if (!text || !parent || parent.closest(".gl-sr, .nav-mode, .account-skeleton, .site-signin-skeleton")) continue;
+          if (!text || !parent || parent.closest(".gl-sr, .nav-mode, .account-skeleton, .site-signin-skeleton, .paint-skip")) continue;
           if (!shown(parent)) continue;
           if (parent.closest(".site-actions")) marks.add(`header: ${text}`);
           else if (parent.closest("h1")) marks.add(`title: ${text}`);
@@ -36,7 +36,7 @@ export async function installPaintRecorder(page: Page) {
         const actions = header.querySelector(".site-actions");
         if (!actions) continue;
         if (actions.querySelector(".site-signin-skeleton") && shown(actions.querySelector(".site-signin-skeleton")!)) {
-          marks.add("header: Checking sign-in…");
+          marks.add("header: Opening dashboard…");
         }
         addText(actions);
       }
@@ -44,7 +44,7 @@ export async function installPaintRecorder(page: Page) {
       for (const shell of document.querySelectorAll("main .account-panel-shell")) {
         if (!shown(shell)) continue;
         if (shell.querySelector(".account-skeleton") && shown(shell.querySelector(".account-skeleton")!)) {
-          marks.add("panel: Checking sign-in…");
+          marks.add("panel: Opening dashboard…");
         }
         addText(shell);
       }

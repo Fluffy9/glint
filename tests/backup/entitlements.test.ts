@@ -1,17 +1,20 @@
 import { describe, expect, it } from "vitest";
+import { hashCapability } from "../../functions/src/domain/crypto";
 import {
+  addCiphertext,
   applyPaidSession,
-  canAccessBackup,
-  claimEntitlement,
+  canDeleteShelf,
+  canDownloadBackup,
+  canUploadBackup,
   DAY_MS,
-  deleteAccount,
+  deleteShelf,
   emptyBackupState,
-  expireEntitlement,
+  entitlementForVault,
   expiryDue,
   expiryTargets,
+  redeemPaidCheckout,
   renewalDue,
   renewalTargets,
-  runDeleteAccount,
   YEAR_MS,
   type PaidSession,
 } from "../../functions/src/domain/state";
@@ -44,7 +47,7 @@ describe("one-time backup entitlements", () => {
   it("sets paidUntil a year out and stacks a second year on the current end", () => {
     const first = applyPaidSession(emptyBackupState(), session());
     expect(first.entitlements[0]?.paidUntil.toISOString()).toBe(new Date(paidAt.getTime() + YEAR_MS).toISOString());
-    expect(first.entitlements[0]?.uid).toBeNull();
+    expect(first.entitlements[0]?.vaultId).toBeNull();
 
     const secondAt = new Date("2026-06-01T00:00:00.000Z");
     const second = applyPaidSession(first, session({ id: "cs_2", paidAt: secondAt }));
@@ -64,99 +67,80 @@ describe("one-time backup entitlements", () => {
     expect(twice.orders).toHaveLength(1);
     expect(twice.entitlements[0]?.paidUntil.toISOString()).toBe(once.entitlements[0]?.paidUntil.toISOString());
   });
-
-  it("claims a pending entitlement onto the signed-in user", () => {
-    const paid = applyPaidSession(emptyBackupState(), session());
-    const missed = claimEntitlement(paid, "uid_1", "other@example.com");
-    expect(missed.entitlements[0]?.uid).toBeNull();
-
-    const claimed = claimEntitlement(paid, "uid_1", "buyer@example.com");
-    expect(claimed.entitlements[0]).toMatchObject({ uid: "uid_1", email: "buyer@example.com" });
-    expect(claimed.users).toEqual(["uid_1"]);
-  });
 });
 
-describe("backup access, renewal, and expiry", () => {
+describe("upload capability", () => {
   const until = new Date(paidAt.getTime() + YEAR_MS);
 
-  it("allows the owner only while paidUntil is in the future", () => {
-    expect(
-      canAccessBackup({ authUid: "uid_1", ownerUid: "uid_1", paidUntil: until, now: paidAt }),
-    ).toBe(true);
-    expect(
-      canAccessBackup({ authUid: "uid_2", ownerUid: "uid_1", paidUntil: until, now: paidAt }),
-    ).toBe(false);
-    expect(
-      canAccessBackup({ authUid: null, ownerUid: "uid_1", paidUntil: until, now: paidAt }),
-    ).toBe(false);
-    expect(
-      canAccessBackup({ authUid: "uid_1", ownerUid: "uid_1", paidUntil: until, now: until }),
-    ).toBe(false);
+  it("binds the first vault and refuses a second vault on the same email", async () => {
+    const paid = applyPaidSession(emptyBackupState(), session());
+    const hash = await hashCapability("secret-a");
+    const other = await hashCapability("secret-b");
+    const first = redeemPaidCheckout(paid, {
+      sessionId: "cs_1",
+      vaultId: "vault-a",
+      capabilityHash: hash,
+      now: paidAt,
+    });
+    expect(first.ok).toBe(true);
+    if (!first.ok) return;
+    const stolen = redeemPaidCheckout(first.state, {
+      sessionId: "cs_1",
+      vaultId: "vault-b",
+      capabilityHash: other,
+      now: paidAt,
+    });
+    expect(stolen).toEqual({ ok: false, error: "taken" });
+
+    const entitlement = entitlementForVault(first.state, "vault-a");
+    expect(canUploadBackup({ entitlement, vaultId: "vault-a", capabilityHash: hash, now: paidAt })).toBe(true);
+    expect(canUploadBackup({ entitlement, vaultId: "vault-a", capabilityHash: other, now: paidAt })).toBe(false);
+    expect(canUploadBackup({ entitlement, vaultId: "vault-a", capabilityHash: hash, now: until })).toBe(false);
+    expect(canDownloadBackup({ entitlement, vaultId: "vault-a", now: paidAt })).toBe(true);
+    expect(canDownloadBackup({ entitlement, vaultId: "vault-b", now: paidAt })).toBe(false);
+    expect(canDeleteShelf({ entitlement, vaultId: "vault-a", capabilityHash: hash })).toBe(true);
+    expect(canDeleteShelf({ entitlement, vaultId: "vault-a", capabilityHash: other })).toBe(false);
   });
 
-  it("selects renewal inside the lead window and expiry after the grace period", () => {
+  it("keeps ciphertext when the year ends and removes only the shelf on delete", () => {
+    const paid = applyPaidSession(emptyBackupState(), session());
+    const redeemed = redeemPaidCheckout(paid, {
+      sessionId: "cs_1",
+      vaultId: "vault-a",
+      capabilityHash: "hash",
+      now: paidAt,
+    });
+    if (!redeemed.ok) throw new Error("redeem");
+    const stored = addCiphertext(
+      redeemed.state,
+      { id: "obj_1", vaultId: "vault-a", category: "heart", nonce: "n", keyVersion: 1, size: 4 },
+      new Uint8Array([1, 2, 3, 4]),
+    );
+    if (!stored) throw new Error("store");
+    const again = addCiphertext(
+      stored,
+      { id: "obj_1", vaultId: "vault-a", category: "heart", nonce: "n", keyVersion: 1, size: 4 },
+      new Uint8Array([9]),
+    );
+    expect(again).toBeNull();
+    expect(expiryDue(until, new Date(until.getTime() + 30 * DAY_MS))).toBe(true);
+    expect(stored.blobs["backups/vault-a/heart/obj_1"]).toEqual(new Uint8Array([1, 2, 3, 4]));
+
+    const deleted = deleteShelf(stored, "vault-a");
+    expect(deleted.blobs["backups/vault-a/heart/obj_1"]).toBeUndefined();
+    expect(deleted.orders).toEqual(stored.orders);
+    expect(deleted.entitlements).toHaveLength(1);
+  });
+
+  it("selects renewal from the Stripe email", () => {
+    const paid = applyPaidSession(emptyBackupState(), session());
     expect(renewalDue(until, new Date(until.getTime() - 31 * DAY_MS))).toBe(false);
     expect(renewalDue(until, new Date(until.getTime() - 30 * DAY_MS))).toBe(true);
-    expect(renewalDue(until, until)).toBe(false);
-    expect(expiryDue(until, new Date(until.getTime() + 29 * DAY_MS))).toBe(false);
-    expect(expiryDue(until, new Date(until.getTime() + 30 * DAY_MS))).toBe(true);
-
-    const claimed = claimEntitlement(applyPaidSession(emptyBackupState(), session()), "uid_1", "buyer@example.com");
-    expect(renewalTargets(claimed, new Date(until.getTime() - DAY_MS)).map((item) => item.uid)).toEqual(["uid_1"]);
-    expect(expiryTargets(claimed, new Date(until.getTime() + 30 * DAY_MS)).map((item) => item.uid)).toEqual([
-      "uid_1",
+    expect(renewalTargets(paid, new Date(until.getTime() - DAY_MS)).map((item) => item.email)).toEqual([
+      "buyer@example.com",
     ]);
-  });
-});
-
-describe("account delete", () => {
-  it("removes ciphertext and the user, and keeps the Stripe order", async () => {
-    const calls: string[] = [];
-    await runDeleteAccount("uid_1", {
-      storage: async () => {
-        calls.push("storage");
-      },
-      objects: async () => {
-        calls.push("objects");
-      },
-      entitlement: async () => {
-        calls.push("entitlement");
-      },
-      auth: async () => {
-        calls.push("auth");
-      },
-    });
-    expect(calls).toEqual(["storage", "objects", "entitlement", "auth"]);
-
-    const paid = claimEntitlement(applyPaidSession(emptyBackupState(), session()), "uid_1", "buyer@example.com");
-    const withHealth = {
-      ...paid,
-      objects: [{ id: "obj_1", uid: "uid_1", category: "heart", nonce: "n", keyVersion: 1, size: 4 }],
-      blobs: {
-        "backups/uid_1/heart/obj_1": new Uint8Array([1, 2, 3, 4]),
-        "backups/uid_2/sleep/obj_2": new Uint8Array([9]),
-      },
-      entitlements: [
-        ...paid.entitlements,
-        {
-          email: "other@example.com",
-          paidUntil: paid.entitlements[0]!.paidUntil,
-          stripeCustomerId: "cus_2",
-          uid: "uid_2",
-        },
-      ],
-    };
-
-    const expired = expireEntitlement(withHealth, "uid_1");
-    expect(expired.blobs["backups/uid_1/heart/obj_1"]).toBeUndefined();
-    expect(expired.blobs["backups/uid_2/sleep/obj_2"]).toEqual(new Uint8Array([9]));
-    expect(expired.objects).toEqual([]);
-    expect(expired.orders).toHaveLength(1);
-
-    const deleted = deleteAccount(withHealth, "uid_1");
-    expect(deleted.users).toEqual([]);
-    expect(deleted.entitlements.map((item) => item.uid)).toEqual(["uid_2"]);
-    expect(deleted.orders).toEqual(withHealth.orders);
-    expect(deleted.blobs["backups/uid_2/sleep/obj_2"]).toEqual(new Uint8Array([9]));
+    expect(expiryTargets(paid, new Date(until.getTime() + 30 * DAY_MS)).map((item) => item.email)).toEqual([
+      "buyer@example.com",
+    ]);
   });
 });

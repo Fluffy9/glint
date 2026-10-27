@@ -1,11 +1,8 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    match /backups/{uid}/{category}/{objectId} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == uid
-        && firestore.exists(/databases/(default)/documents/entitlements/$(uid))
-        && firestore.get(/databases/(default)/documents/entitlements/$(uid)).data.paidUntil > request.time;
+    match /backups/{vaultId}/{category}/{objectId} {
+      allow read, write: if false;
     }
     match /{allPaths=**} {
       allow read, write: if false;

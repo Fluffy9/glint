@@ -1,34 +1,27 @@
 # Health data
 
-Glint does not collect heart rate, sleep, or activity on this website as plaintext. The rules below are the contract for the phone app, so the first health table cannot land in `commerce`.
+Glint does not collect heart rate, sleep, or activity on this website as plaintext. Samples are encrypted in the browser before they are stored.
 
 ## Destinations
 
 Activity, heart, and sleep each live in one of these places:
 
-- **On this phone.** Nothing in that category is uploaded.
-- **Encrypted backup.** The phone encrypts the category, then uploads ciphertext. The server stores the blob, a nonce, and a key version. It does not store readable samples. Decryption uses the customer’s password (or a key derived from it). A password reset does not unwrap old ciphertext. If the password is gone and there is no phone copy or export, that backup is gone.
-- **Plain export.** The customer can write an unencrypted CSV or JSON, including to Google Drive or another place they pick. That file is outside Glint’s ciphertext model.
+- **On this browser.** Nothing in that category is uploaded. The vault flag in localStorage only records that a vault exists. IndexedDB holds ciphertext.
+- **Encrypted backup.** This browser encrypts the bytes, then backup uploads ciphertext. The server stores the blob, a nonce, and a key version. It does not store readable samples. There is no account. A new payment does not unwrap old ciphertext. If the recovery key is lost and every passkey wrap is gone, that backup stays locked.
+- **Plain export.** The customer can write an unencrypted CSV or JSON, including to Google Drive or another place they pick. That file is outside Glint’s ciphertext model. Sending it to Google Drive is not built yet.
 
-The default is on this phone. If the customer pays for backup, uploads are always encrypted. There is no server-readable “in your account” health copy. The website decrypts with the password only while the customer is signed in and looking.
+The default is this browser. If the customer pays for backup, uploads are ciphertext. There is no server-readable health copy.
 
-Other apps on the phone can receive a category from the phone. Grants that pull from Glint cloud data only see what the customer’s session can decrypt. Grants are per app, per category, and revocable. Each grant stores who, what, which explanation the customer saw, and when.
+## Who paid
 
-Turning a category off deletes the copy that is no longer allowed. Account deletion deletes ciphertext objects and grants. Glint cannot backfill samples it never received in the clear.
+Firestore holds orders and `entitlements/{email}` with `paidUntil`, the Stripe customer, the bound `vaultId`, and a hash of the upload capability. Firebase Storage holds ciphertext at `backups/{vaultId}/{category}/{id}`. Clients cannot write those objects. A Cloud Function checks the capability hash and `paidUntil` before it writes. Download of ciphertext for a vault id is allowed only while `paidUntil` is in the future. Orders are not readable from the client. The Stripe webhook is a Cloud Function. It does not write a subscription.
 
-## Schemas and roles
-
-Firestore holds orders, pending entitlements, and `entitlements/{uid}.paidUntil`. Firebase Storage holds ciphertext at `backups/{uid}/{category}/{id}`. Clients can read an entitlement and upload only while `paidUntil` is in the future. Orders are not readable from the client. The Stripe webhook is a Cloud Function. It does not write a subscription.
-
-Enforced by the Commerce schema test and the Commerce role test (`pnpm test:db`).
-
-Ciphertext is fetched with the signed-in customer's token and decrypted with material derived from their password. The service role is not a health-data tool, and it is not in this app.
+Missing a renewal stops uploads. The locked copies stay locked.
 
 ## Before the first health byte
 
 These are human gates:
 
-- Supabase Auth exists, email is verified, and a destination row records the disclosure version the customer accepted.
-- Backup uses client-side encryption. The password-derived key material is never stored on the server in a form that lets staff decrypt blobs offline.
-- The phone app is confirmed as the only component that uploads health data. If some other software on the band path also sends it, the privacy page names that recipient.
+- Backup uses client-side encryption. The data key and the recovery key are never stored on the server.
+- This browser is the uploader. iPhone browsers do not connect to the band in this slice.
 - Counsel reviews the privacy policy, including the FTC Health Breach Notification Rule and applicable state law, before real health data is stored. Do not describe Glint as HIPAA compliant.

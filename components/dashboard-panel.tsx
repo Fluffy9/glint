@@ -18,13 +18,17 @@ import {
 } from "@/functions/src/domain/crypto";
 import { functionUrl } from "@/functions/src/domain/emulator";
 import { downloadBackup, redeemBackup, uploadBackup } from "@/functions/src/domain/backup-rest";
-import { browserBand } from "@/lib/band";
+import { DashboardDevSlot } from "@/components/dashboard-dev-slot";
+import { resolveBandSource } from "@/lib/band";
 import { browserFetch, firebaseClient } from "@/lib/client-firebase";
+import { readFixtureBandFlag } from "@/lib/fixture-band-flag";
 import { createPasskey, unlockPasskey } from "@/lib/passkey";
 import { readLocalVault, writeLocalVault, type LocalVault } from "@/lib/vault-db";
 import { VAULT_FLAG_EVENT, readVaultFlag, writeVaultFlag } from "@/lib/vault-flag";
 import { mergeRestoredVault } from "@/lib/vault-restore";
 import { storeBandBytes } from "@/lib/vault-samples";
+
+const isDev = process.env.NODE_ENV === "development";
 
 type Step = "save" | "restore" | "add-passkey" | "open";
 
@@ -258,7 +262,10 @@ export function DashboardPanel({
     setError(null);
     setPending(true);
     try {
-      const source = browserBand(bandServiceId);
+      const source = resolveBandSource({
+        serviceId: bandServiceId,
+        useFixture: isDev && readFixtureBandFlag(localStorage),
+      });
       await source.connect();
       const bytes = await source.read();
       const next = await storeBandBytes(vault, dataKey, bytes, new Date().toISOString());
@@ -434,6 +441,23 @@ export function DashboardPanel({
       ) : null}
 
       {error && screen !== "checking" ? <p className="account-notice-error">{error}</p> : null}
+
+      {isDev ? (
+        <DashboardDevSlot
+          open={screen === "open" && Boolean(vault && dataKey)}
+          vault={vault}
+          dataKey={dataKey}
+          onVault={(next, key) => {
+            setVault(next);
+            setDataKey(key);
+            setPasskeyCount(next?.record.passkeys.length ?? 0);
+            setConnected(false);
+            if (next && key) setStep("open");
+            else setStep(null);
+          }}
+          onNote={setError}
+        />
+      ) : null}
     </div>
   );
 }

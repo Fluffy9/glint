@@ -3,7 +3,11 @@ export type BandSource = {
   read(): Promise<Uint8Array>;
 };
 
-export function fixtureBand(bytes: Uint8Array): BandSource {
+/** Known bytes for local dashboard tests. Not a health metric. */
+export const FIXTURE_BAND_PLAINTEXT = "glint-fixture-sample";
+export const FIXTURE_BAND_BYTES = new TextEncoder().encode(FIXTURE_BAND_PLAINTEXT);
+
+export function fixtureBand(bytes: Uint8Array = FIXTURE_BAND_BYTES): BandSource {
   let connected = false;
   return {
     async connect() {
@@ -53,4 +57,13 @@ export function browserBand(serviceId: string | null): BandSource {
       ? null
       : ((navigator as Navigator & { bluetooth?: BandBluetooth }).bluetooth ?? null);
   return bluetoothBand(bluetooth, serviceId);
+}
+
+/** Prefer the fixture in local testing; otherwise require a real service id + Web Bluetooth. */
+export function resolveBandSource(input: {
+  serviceId: string | null;
+  useFixture: boolean;
+}): BandSource {
+  if (input.useFixture) return fixtureBand();
+  return browserBand(input.serviceId);
 }

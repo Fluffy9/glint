@@ -12,11 +12,19 @@ export const metadata: Metadata = {
   description: fill(copy.meta.description),
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const DevRoot =
+    process.env.NODE_ENV === "development"
+      ? (await import("@/components/dev-root")).DevRoot
+      : null;
+
   return (
     <html lang={site.locale} data-theme={`${site.defaultColor}-${site.defaultMode}`}>
       <body>
-        <AppearanceProvider>{children}</AppearanceProvider>
+        <AppearanceProvider>
+          {children}
+          {DevRoot ? <DevRoot /> : null}
+        </AppearanceProvider>
       </body>
     </html>
   );

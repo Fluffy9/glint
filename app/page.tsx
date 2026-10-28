@@ -4,6 +4,7 @@ import { FaqSection } from "@/components/faq-section";
 import { FeaturesSection } from "@/components/features-section";
 import { HomeHero } from "@/components/home-hero";
 import { HowItWorks } from "@/components/how-it-works";
+import { NewsletterSection } from "@/components/newsletter-section";
 import { SiteFooter } from "@/components/site-footer";
 import { copy, fill, priceVars } from "@/content";
 import { closedCheckout, fallbackPrices, getDisplayPrices, type DisplayPrices } from "@/lib/prices";
@@ -31,6 +32,7 @@ function HomeBody({ prices }: { prices: DisplayPrices }) {
         <FeaturesSection />
         <CompareSection prices={prices} />
         <HowItWorks />
+        <NewsletterSection />
         <FaqSection prices={prices} />
         <SiteFooter />
       </div>

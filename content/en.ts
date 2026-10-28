@@ -192,6 +192,18 @@ export const en = {
       sources: [{ label: "Polar · Loop", href: "https://www.polar.com/us-en/loop" }],
     },
   ],
+  newsletter: {
+    heading: "Stay in the loop",
+    lede: "We'll email you when the band is ready to order, and occasional development updates only.",
+    emailLabel: "Email",
+    placeholder: "you@example.com",
+    submit: "[ Keep me posted ]",
+    success: "You're on the list.",
+    invalid: "Enter a real email address.",
+    error: "Could not save that email. Try again in a moment.",
+    unavailable: "Sign-up is off until the waitlist is connected.",
+    privacy: "",
+  },
   faq: {
     heading: "Questions",
     lede: "Short answers. Open one if you want the rest of the sentence.",
@@ -289,6 +301,10 @@ export const en = {
     blocks: [
       {
         p: "This website takes payment through Stripe. We store the email on the order, whether you bought the band, and the date backup is paid through. We do not collect heart rate, sleep, or activity here in readable form.",
+      },
+      { h: "Launch list" },
+      {
+        p: "If you join the launch list, we store that email so we can write when the band is ready. You can ask us to delete it. It is not an account, and it is separate from checkout.",
       },
       { h: "On this browser" },
       {

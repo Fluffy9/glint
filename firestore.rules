@@ -12,5 +12,9 @@ service cloud.firestore {
     match /vaultObjects/{vaultId}/items/{objectId} {
       allow read, write: if false;
     }
+
+    match /waitlist/{email} {
+      allow read, write: if false;
+    }
   }
 }

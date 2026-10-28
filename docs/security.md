@@ -12,6 +12,7 @@ Controls are either enforced by a test or marked as a human gate. Add a control 
 | Security headers, including a script policy with no open source and no framing. HSTS is production-only. | Browser headers test |
 | Client components cannot see server secrets. `NEXT_PUBLIC_` names must be listed in `lib/public-env.ts`. | Secrets stay on the server test |
 | The webhook path does not import health storage. | Webhook isolation test |
+| Waitlist emails are written only by Cloud Functions. Clients cannot read or write `waitlist`. | Firebase rules test |
 | One data key encrypts samples. Passkey output and the recovery key wrap that key. The stored record does not hold those secrets in the clear. | Vault key wrapping test |
 | Storage rules deny client reads and writes. Upload goes through a function that checks the capability hash and `paidUntil`. | Firebase rules test |
 | There is no Firebase Auth user. A paid checkout binds one vault id to the Stripe email. | Upload capability test |

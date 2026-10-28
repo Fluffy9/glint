@@ -13,22 +13,24 @@ describe("Firebase rules", () => {
     expect(storage.toLowerCase()).not.toMatch(/heart|sleep|sample|bpm/);
   });
 
-  it("hides orders, entitlements, and vault objects from clients", () => {
+  it("hides orders, entitlements, vault objects, and waitlist from clients", () => {
     expect(firestore).toContain("match /orders/{id}");
     expect(firestore).toContain("match /entitlements/{email}");
     expect(firestore).toContain("match /vaultObjects/{vaultId}/items/{objectId}");
+    expect(firestore).toContain("match /waitlist/{email}");
     expect(firestore).toContain("allow read, write: if false");
     expect(firestore).not.toContain("request.auth");
     expect(firestore.toLowerCase()).not.toMatch(/heart rate|plaintext/);
   });
 
-  it("exports the webhook, redeem, upload, download, renewal, and expiry functions", () => {
+  it("exports the webhook, redeem, upload, download, waitlist, renewal, and expiry functions", () => {
     for (const name of [
       "stripeWebhook",
       "redeemBackup",
       "uploadBackup",
       "downloadBackup",
       "deleteBackup",
+      "joinWaitlist",
       "renewalReminders",
       "expireBackups",
     ]) {

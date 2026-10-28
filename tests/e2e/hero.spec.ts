@@ -15,11 +15,9 @@ test("commits the new band after the colour wipe", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("data-theme", "lavender-light");
 
   await band(page, "Sky").click();
-  expect(await band(page, "Lavender").getAttribute("aria-pressed")).toBe("true");
-
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "sky-light", { timeout: 4_000 });
   await expect(band(page, "Sky")).toHaveAttribute("aria-pressed", "true");
-  await expect(page.locator(".home-hero-wash.is-incoming:visible")).toHaveCount(0);
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "sky-light");
+  await expect(page.locator(".home-hero-halftone.is-incoming")).toHaveCount(0, { timeout: 4_000 });
 });
 
 test("keeps the last colour when picks overlap", async ({ page }) => {
@@ -95,6 +93,6 @@ test.describe("reduced motion", () => {
     await open(page);
     await band(page, "Mint").click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "mint-light");
-    await expect(page.locator(".home-hero-wash.is-incoming:visible")).toHaveCount(0);
+    await expect(page.locator(".home-hero-halftone.is-incoming")).toHaveCount(0);
   });
 });

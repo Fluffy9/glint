@@ -22,7 +22,7 @@ export function HowItWorks() {
   );
 
   return (
-    <section className="section section-align-left" aria-labelledby="how">
+    <section className="section section-align-center" aria-labelledby="how">
       <h2 id="how" className="h2">
         {copy.how.heading}
       </h2>

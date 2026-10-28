@@ -12,7 +12,7 @@ export function CompareSection({
   const vars = priceVars(prices);
 
   return (
-    <section className="section section-align-left" aria-labelledby="compare">
+    <section className="section section-align-center" aria-labelledby="compare">
       <div className="compare-band">
         <div className="compare-band-field" aria-hidden>
           <WarpCheck cols={28} rows={24} cell={48} seed={19} />

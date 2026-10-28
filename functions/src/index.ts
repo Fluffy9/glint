@@ -22,6 +22,7 @@ import {
   type Entitlement,
   type Order,
 } from "./domain/state";
+import { waitlistEmail } from "./domain/waitlist";
 import { postStripeWebhook } from "./domain/webhook";
 
 const emulator = process.env.FUNCTIONS_EMULATOR === "true";
@@ -240,6 +241,31 @@ export const deleteBackup = onRequest(httpOptions, async (req, res) => {
   await batch.commit();
   await saveCommerce(deleteShelf(state, vaultId));
   res.status(200).json({ deleted: true });
+});
+
+export const joinWaitlist = onRequest(httpOptions, async (req, res) => {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "method" });
+    return;
+  }
+  const body = jsonBody(req);
+  const email = typeof body.email === "string" ? waitlistEmail(body.email) : null;
+  if (!email) {
+    res.status(400).json({ error: "invalid" });
+    return;
+  }
+  const ref = getFirestore().collection("waitlist").doc(email);
+  const existing = await ref.get();
+  if (existing.exists) {
+    await ref.set({ lastSeenAt: Timestamp.now() }, { merge: true });
+  } else {
+    await ref.set({
+      email,
+      createdAt: Timestamp.now(),
+      source: "site",
+    });
+  }
+  res.status(200).json({ ok: true });
 });
 
 export const renewalReminders = onSchedule({ region, schedule: "every day 16:00" }, async () => {

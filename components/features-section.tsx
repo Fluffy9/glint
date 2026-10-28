@@ -3,7 +3,7 @@ import { copy } from "@/content";
 
 export function FeaturesSection() {
   return (
-    <section className="section section-align-left" aria-labelledby="features">
+    <section className="section section-align-center" aria-labelledby="features">
       <h2 id="features" className="h2">
         {copy.features.heading}
       </h2>

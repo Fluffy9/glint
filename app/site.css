@@ -197,15 +197,13 @@ a.gl-btn-primary,
   );
 }
 
-.home-hero-wash.is-incoming {
-  clip-path: inset(0 100% 0 0);
-  animation: heroColorWipe var(--dur-sheen) var(--ease-out) forwards;
-}
-
-@keyframes heroColorWipe {
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+.home-hero-halftone {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 .home-hero-nav {
@@ -816,9 +814,8 @@ a.gl-btn-primary,
     transition: none;
   }
 
-  .home-hero-wash.is-incoming {
-    animation: none;
-    clip-path: none;
+  .home-hero-halftone.is-incoming {
+    display: none;
   }
 
   .gb-sway,

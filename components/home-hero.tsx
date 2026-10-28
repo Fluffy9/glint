@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppearance } from "@/components/appearance-provider";
 import { boxPaint, useBandWipe, washStyle } from "@/components/band-wipe";
+import { HalftoneWipe } from "@/components/halftone-wipe";
 import { BandPicker } from "@/components/band-picker";
 import { PackagingDev } from "@/components/glint-box/packaging-dev";
 import { SlideBox } from "@/components/glint-box/slide-box";
@@ -24,7 +25,7 @@ type Props = {
 
 export function HomeHero({ priceNote }: Props) {
   const { band, mode, setBand } = useAppearance();
-  const { wipe, paintBand, chooseBand, finishWipe } = useBandWipe(band, setBand);
+  const { wipe, covered, paintBand, chooseBand, coverWipe, finishWipe } = useBandWipe(band, setBand);
   const { rx, ry, onPointerDown, onPointerMove, onPointerUp } = useBoxDrag();
   const [slide, setSlide] = useState(0);
   const [pat, setPat] = useState<PatternId>("warpSpark");
@@ -80,14 +81,18 @@ export function HomeHero({ priceNote }: Props) {
 
   return (
     <section className="home-hero" style={boxPaint(paintBand)} aria-label={site.name}>
-      <div className="home-hero-wash" style={washStyle(wipe?.from ?? band, mode)} aria-hidden />
+      <div
+        className="home-hero-wash"
+        style={washStyle(wipe && covered ? wipe.to : (wipe?.from ?? band), mode)}
+        aria-hidden
+      />
       {wipe ? (
-        <div
+        <HalftoneWipe
           key={`${wipe.from}-${wipe.to}`}
-          className="home-hero-wash is-incoming"
-          style={washStyle(wipe.to, mode)}
-          onAnimationEnd={finishWipe}
-          aria-hidden
+          band={wipe.to}
+          mode={mode}
+          onCovered={coverWipe}
+          onDone={finishWipe}
         />
       ) : null}
 
